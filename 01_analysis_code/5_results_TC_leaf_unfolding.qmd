@@ -1,0 +1,494 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: inline
+execute:
+    freeze: false
+---
+
+```{r parameters, include=FALSE, eval=TRUE}
+phase <- "leaf unfolding"
+species <- "TC"
+```
+
+# Tilia cordata
+
+```{r source-global, include=FALSE}
+location <- paste0(getwd())
+source(paste0("../00_helpers/setup.R")) #common libraries and custom functions
+source(paste0("../00_helpers/species_and_phases.R"))
+
+lib_results <- c(
+  "nlme",
+  "MuMIn",
+  "cAIC4",
+  "lattice",
+  "broom.mixed"
+  )
+package_fun(lib_results, "results1")
+
+# type of temperature parametrization
+exclude_type <- "mai"
+
+# function to extract conditional LogLikelihood and return NA if failed
+fun_get_log <- function(x) {
+  tryCatch({
+    cAIC(x)$loglikelihood
+  }, error = function(e) {
+    NA # Return NA or some indication of failure for models that cause an error
+  })
+}
+```
+
+
+## Effect shape of temperature
+
+```{r load-temp-test}
+temp_test <- list.files(path = paste0(path_output_data),
+                        pattern = sprintf("^temp_test.*_%s_%s\\.rds$", species, gsub(" ", "_", phase)),
+                   full.names = TRUE) %>%
+  lapply(readRDS)
+
+temp_test_models <- temp_test %>%
+  list_flatten() %>%
+  rbind() %>%
+  as.data.frame() %>%
+  pivot_longer(cols = 1:ncol(.), names_to = "model_name", values_to = "model") %>%
+  filter(!str_detect(model_name, exclude_type))
+```
+
+```{r load-ref-true}
+ref_true <- list.files(path = paste0(path_output_data),
+                        pattern = sprintf("^ref_true.*_%s_%s\\.rds$", species, gsub(" ", "_", phase)),
+                   full.names = TRUE) %>%
+  lapply(readRDS)
+
+ref_true_models <- ref_true %>%
+  list_flatten() %>%
+  rbind() %>%
+  as.data.frame() %>%
+  pivot_longer(cols = 1:ncol(.), names_to = "model_name", values_to = "model") %>%
+  filter(!str_detect(model_name, exclude_type))
+```
+
+```{r load-ref-imp}
+ref_imp <- list.files(path = paste0(path_output_data),
+                        pattern = sprintf("^ref_imp.*_%s_%s\\.rds$", species, gsub(" ", "_", phase)),
+                   full.names = TRUE) %>%
+  lapply(readRDS)
+
+ref_imp_models <- ref_imp %>%
+  list_flatten() %>%
+  rbind() %>%
+  as.data.frame() %>%
+  pivot_longer(cols = 1:ncol(.), names_to = "model_name", values_to = "model") %>%
+  filter(!str_detect(model_name, exclude_type))
+```
+
+```{r bind-ref}
+all_ref <- bind_rows(temp_test_models, ref_true_models, ref_imp_models) %>%
+  filter(!str_detect(model_name, exclude_type),
+         !str_detect(model_name, "slo"))
+```
+
+```{r extract-temp-test}
+results_temp_test <- all_ref %>%
+  mutate(tidy = map2(model, model_name, ~broom.mixed::tidy(.x) %>% mutate(model_name = .y)), # extract coefficients and p-values
+         RMSE = map(model, ~sqrt(mean(.x$residuals^2))), # extract RMSE
+         cAIC = map(model, ~fun_get_caic(.x)), # extract cAIC
+         family = case_when(str_detect(model_name, "con") ~ "conservative",
+                            str_detect(model_name, "mai") ~ "mainstream",
+                            TRUE ~ "other"),
+         calls = map(model, ~deparse(.x[["call"]]) %>% paste(collapse = " ")) %>% as.character(), # extract calls
+         fixed_effects = map(model, ~deparse(.x[["terms"]]) %>% paste(collapse = " ")) %>% as.character(), # extract fixed effects
+         random_effects = map(model, ~.x[["call"]][["random"]]) %>% as.character()) # extract random effects
+```
+
+```{r format-selection}
+selection_param <- results_temp_test %>%
+  select(model_name, family, cAIC, RMSE, fixed_effects) %>%
+  unnest(RMSE, cAIC) %>%
+  group_by(family) %>%
+  mutate(d.cAIC = cAIC - min(cAIC),
+         d.RMSE = RMSE - min(RMSE))
+
+tidy <- results_temp_test %>%
+  select(tidy, family) %>%
+  unnest(tidy) %>%
+  mutate(label = label_fun_sim(term, "short")) %>%
+  select(model_name, label, family, p.value, estimate, std.error, term)
+```
+
+```{r tbl-temp-test-selection}
+#| tbl-cap: Comparison of model performance of linear and polynomial temperature parameters with cAIC and RMSE.
+
+table <- selection_param %>%
+  filter(!model_name %like% "imp") %>% 
+  mutate_if(is.numeric, round, 3) %>%
+  arrange(family, d.cAIC) %>% 
+    datatable(filter = 'top', options = list(scrollX = TRUE, pageLength = 10, extenstions="Buttons", dom = 'Bfrtip', buttons = "print"), rownames=FALSE)
+table
+```
+
+```{r tbl-temp-test-coefficients}
+#| tbl-cap: Comparison of parameters across models with estimate, standard error, t-value and p-value
+  
+table <- tidy %>%
+  filter(!model_name %like% "imp") %>% 
+  mutate_if(is.numeric, round, 4) %>%
+  filter(!str_detect(term, "Intercept|Observation|sd"),
+         str_detect(model_name, "temp_test")) %>%
+  arrange(family) %>% 
+    datatable(filter = 'top', options = list(scrollX = TRUE, pageLength = 10, dom = 'Bfrtip'), rownames=FALSE)
+table
+```
+
+## Effect shape of temperature with chilling
+
+```{r tbl-shape-performance}
+#| tbl-cap: Comparison of model performance of linear and non-linear growing degree days in combination with chilling degree days. 
+
+table <- selection_param %>%
+  filter(model_name %like% "imp") %>% 
+  mutate_if(is.numeric, round, 3) %>%
+  arrange(family, d.cAIC) %>% 
+    datatable(filter = 'top', options = list(scrollX = TRUE, pageLength = 10, extenstions="Buttons", dom = 'Bfrtip', buttons = "print"), rownames=FALSE)
+table
+```
+
+```{r tbl-shape-coefficients}
+#| tbl-cap: Comparison of siginificance of various growing and chilling degree day combinations.
+
+table <- tidy %>%
+  filter(model_name %like% "imp") %>% 
+  mutate_if(is.numeric, round, 4) %>%
+  filter(!str_detect(term, "Intercept|Observation|sd")) %>%
+  arrange(family) %>% 
+    datatable(filter = 'top', options = list(scrollX = TRUE, pageLength = 10, dom = 'Bfrtip'), rownames=FALSE)
+table
+```
+
+## Global model variations
+
+```{r load-objects}
+all_models <- list.files(path = paste0(path_output_data),
+                    pattern = sprintf("^dredge_(.*?)_%s_%s\\.rds$", species, gsub(" ", "_", phase)),
+                    full.names = TRUE) %>%
+  setNames(gsub("^dredge_(.*?)\\.rds", "\\1", basename(.))) %>%
+  lapply(readRDS)
+```
+
+
+```{r extract-model-variations}
+variations_d4 <- map_df(all_models, ~ .x[["dredge_result_d4"]] %>%
+                          as.data.frame() %>%
+                          mutate(model_name=.x[["model_name"]]) %>%
+                          mutate_if(is.numeric, signif, 3) %>%
+                          select(model_name, cAIC, delta, weight, RMSE, logLik, `(Intercept)`, contains("GDD"), everything()) %>%
+                          filter(!str_detect(model_name, exclude_type)))
+
+variations_d2 <- map_df(all_models, ~ .x[["dredge_result_d2"]] %>%
+                          as.data.frame() %>%
+                          mutate(model_name=.x[["model_name"]]) %>%
+                          mutate_if(is.numeric, signif, 3) %>%
+                          select(model_name, cAIC, delta, weight, RMSE, logLik, `(Intercept)`, contains("GDD"), everything()) %>%
+                          filter(!str_detect(model_name, exclude_type)))
+```
+
+
+
+
+
+```{r tbl-variations}
+#| tbl-cap: Number of equally or almost equally informative conservative model variations and maximum model weights (Δ cAIC < 4 and < 2).
+
+# weight_checkd4 <- variations_d4 %>% group_by(model_name) %>% summarize(weight_sum = sum(weight))
+# weight_checkd2 <- variations_d2 %>% group_by(model_name) %>% summarize(weight_sum = sum(weight))
+
+weightd2 <- variations_d2 %>%
+  filter(!str_detect(model_name, exclude_type)) %>%
+  summarize(max_weight2 = max(weight))
+
+weightd4 <- variations_d4 %>%
+  filter(!str_detect(model_name, exclude_type)) %>%
+  summarize(max_weight4 = max(weight))
+
+# summarize conservative model variations
+con_var <- variations_d4 %>%
+  filter(!str_detect(model_name, exclude_type)) %>%
+  summarize(SPECIES_SHORT = species,
+            d4 = sum(delta <4),
+            d2 = sum(delta <2)) %>%
+  bind_cols(weightd4, weightd2)
+
+table <- con_var %>%
+  select(-SPECIES_SHORT) %>%
+  datatable(rownames=FALSE, options = list(scrollX = TRUE, pageLength = 5),
+            colnames = c('number of models (Δ < 4)' = "d4",
+                         'number of models (Δ < 2)' = "d2",
+                         'maximum weight (Δ < 4)' = "max_weight4",
+                         'maximum weight (Δ < 2)' = "max_weight2"))
+table
+```
+
+```{r tbl-best-models}
+#| tbl-cap: The three best model variations derived from the global model.
+best <- list.files(path = paste0(path_output_data),
+                   pattern = sprintf("^best_(.*?)_%s_%s\\.rds$", species, gsub(" ", "_", phase)),
+                   full.names = TRUE) %>%
+    setNames(nm = sapply(basename(.), function(x) {
+    parts <- unlist(strsplit(x, "_"))
+    paste(parts[1:2], collapse = "_")
+  })) %>%
+  lapply(readRDS)
+
+best_models <- best %>%
+  flatten() %>%
+  rbind() %>%
+  as.data.frame() %>% 
+  pivot_longer(cols = 1:ncol(.), names_to = "model_name", values_to = "model") %>%
+  filter(!str_detect(model_name, exclude_type))
+
+best_calls <- best_models %>% 
+  mutate(calls = map(model, ~deparse(.x[["call"]]) %>% paste(collapse = " ")) %>% as.character(), # extract calls
+         fixed_effects = map(model, ~deparse(.x[["terms"]]) %>% paste(collapse = " ")) %>% as.character(), # extract fixed effects
+         random_effects = map(model, ~.x[["call"]][["random"]]) %>% as.character()) %>% # extract random effects
+  select(model_name, fixed_effects, random_effects)
+
+best_calls %>%
+  select(-random_effects) %>% 
+  datatable(filter = 'top', options = list(scrollX = TRUE, pageLength = 5, dom = 'Bfrtip'), rownames=FALSE)
+```
+
+```{r tbl-parsimonious-con}
+#| tbl-cap: The three most parsimonious models derived from the global model.
+parsimonious_models <- map(all_models, ~ keep(.x, .p = str_detect(names(.x), "parsimonious"))) %>%
+  list_flatten() %>% # flatten list two times
+  list_flatten() %>%
+  enframe() %>%
+  rename(model = value, model_name = name) %>%
+  mutate(model_name = case_when(model_name %like% "con" & model_name %like% "d4" ~ "parsimonious_con_d4",
+                                model_name %like% "con" & model_name %like% "d2" ~ "parsimonious_con_d2",
+                                model_name %like% "mai" & model_name %like% "d4" ~ "parsimonious_mai_d4",
+                                model_name %like% "mai" & model_name %like% "d2" ~ "parsimonious_mai_d2",
+                                TRUE ~ model_name)) %>%
+  group_by(model_name) %>%
+  mutate(suffix = letters[row_number()]) %>%
+  ungroup() %>% 
+  mutate(model_name = paste0(model_name, suffix)) %>%
+  filter(!str_detect(model_name, exclude_type))
+  
+parsimonious_calls <- parsimonious_models %>% 
+  mutate(calls = map(model, ~deparse(.x[["call"]]) %>% paste(collapse = " ")) %>% as.character(), # extract calls
+         fixed_effects = map(model, ~deparse(.x[["terms"]]) %>% paste(collapse = " ")) %>% as.character(), # extract fixed effects
+         random_effects = map(model, ~.x[["call"]][["random"]]) %>% as.character()) %>% # extract random effects
+  select(model_name, fixed_effects, random_effects)
+
+parsimonious_calls %>%
+  select(-random_effects) %>% 
+  datatable(filter = 'top', options = list(scrollX = TRUE, pageLength = 5, dom = 'Bfrtip'), rownames=FALSE)
+```
+
+
+```{r format-weights, echo=FALSE}
+plot_weightd4 <- map_df(all_models, ~ as.data.frame(as.matrix(.x$summary_weight_d4)), .id = "model_id") %>%
+  mutate(WEIGHT=as.numeric(WEIGHT),
+         category = label_fun_sim(PARAMETER, "category"),
+         PARAMETER_ABBR = label_fun_sim(PARAMETER, "short"),
+         PARAMETER = label_fun_sim(PARAMETER, "full"),
+         DELTA = "D4") %>%
+  filter(!str_detect(model_id, exclude_type))
+
+plot_weightd2 <- map_df(all_models, ~ as.data.frame(as.matrix(.x$summary_weight_d2)), .id = "model_id") %>%
+  mutate(WEIGHT=as.numeric(WEIGHT),
+         category = label_fun_sim(PARAMETER, "category"),
+         PARAMETER_ABBR = label_fun_sim(PARAMETER, "short"),
+         PARAMETER = label_fun_sim(PARAMETER, "full"),
+         DELTA = "D2") %>%
+  filter(!str_detect(model_id, exclude_type))
+```
+
+
+
+```{r rm-large-objects}
+rm(all_models)
+invisible(gc(verbose = FALSE))
+```
+
+## Model processing
+
+```{r load-data}
+data <- readRDS(paste0(path_own_data, "/data_unscaled_", species, "_", gsub (" ", "_", phase), ".rds")) %>%
+  rename_fun() %>%
+  select(-LEAF_COLOURING_LAG) %>%
+  mutate(METEO_ID = factor(METEO_ID),
+         RELIEF = factor(RELIEF),
+         SOCIAL_SITUATION = factor(SOCIAL_SITUATION),
+         EDGE_DIST_IMPUTED = factor(EDGE_DIST_IMPUTED))
+```
+
+```{r load-temporal-correlation}
+autoregression_simple <- readRDS(paste0(path_output_data, "/autoregression_simple.rds"))
+random_simple <- readRDS(paste0(path_output_data, "/random_simple.rds"))
+```
+
+```{r load-reference-refined}
+ref_imp <- list.files(path = paste0(path_output_data),
+                        pattern = sprintf("^ref_imp.*_%s_%s\\.rds$", species, gsub(" ", "_", phase)),
+                   full.names = TRUE) %>%
+  lapply(readRDS)
+
+ref_imp_models <- ref_imp %>%
+  list_flatten() %>%
+  rbind() %>%
+  as.data.frame() %>%
+  pivot_longer(cols = 1:ncol(.), names_to = "model_name", values_to = "model") %>%
+  filter(!str_detect(model_name, exclude_type))
+```
+
+```{r load-global-models, include=FALSE}
+global <- list.files(path = paste0(path_output_data),
+                     pattern = paste0("global.*_", species, "_", gsub(" ", "_", phase), "\\.rds$"),
+                     full.names = TRUE) %>%
+  setNames(nm = sapply(basename(.), function(x) {
+    parts <- unlist(strsplit(x, "_"))
+    paste(parts[1:2], collapse = "_")
+  })) %>%
+  lapply(readRDS)
+
+global_models <- global %>%
+  rbind() %>%
+  as.data.frame() %>%
+  pivot_longer(cols = 1:ncol(.), names_to = "model_name", values_to = "model") %>%
+  filter(!str_detect(model_name, exclude_type))
+```
+
+```{r species-specific-manual-models, echo=TRUE}
+# nest data set
+manual_models_input <- data %>%
+  nest()
+
+# save to file for evaluation of manual models in the template
+saveRDS(manual_models_input, paste0(path_output_data, "/manual_models_", species, "_", gsub (" ", "_", phase), ".rds"))
+
+# source manual models to be evaluated within template
+source(paste0(location, "/5_manual_", species, "_", gsub (" ", "_", phase), ".R"), echo=TRUE, max.deparse.length = 5000)
+
+# format manual models to fit the data frame structure
+manual_models <- manual_models %>%
+  pivot_longer(cols = 2:ncol(.), names_to = "model_name", values_to = "model") %>% 
+  filter(map_lgl(model, ~ !is.null(.x$result))) %>%
+  mutate(model = map(model, "result"))
+```
+
+```{r bind-models-and-extract, include=TRUE, echo=TRUE}
+#| code-fold: true
+
+# function to extract coefficients with confidence intervals
+safe_tidy <- possibly(
+  ~ broom.mixed::tidy(.x, conf.int = TRUE) %>% mutate(model_name = .y), 
+  otherwise = NULL
+)
+
+models <- bind_rows(manual_models, ref_imp_models, ref_true_models, temp_test_models, global_models, best_models, parsimonious_models
+                    ) %>%
+  filter(!str_detect(model_name, exclude_type)) %>% 
+  mutate(tidy = map2(model, model_name, safe_tidy), # extract coefficients and p-values
+         augment = map2(model, model_name, ~{ # extract fitted values, residuals, fixed effects without data that is not contained in the respective model
+           terms <- all.vars(formula(.x))[-1]  # Extract terms and remove response variable
+           broom.mixed::augment(.x) %>%
+           select(all_of(terms), METEO_ID, year, SPECIES_SHORT, .fitted, .resid, .fixed) %>%
+           mutate(model_name = .y)
+           }),
+         terms = map(model, ~all.vars(formula(.x))[-1]),
+         std_random = map(model, ~safely(~ {
+           intervals(.x)$reStruct %>%
+             unlist() %>%
+             as.data.frame() %>%
+             rename(VALUE = 1) %>%
+             rownames_to_column("PARAMETER")})(.x)$result), # calculate and extract standard deviation of random effects
+         res_random = (res_random = map(model, ~.x$sigma)),
+         RMSE = map(model, ~sqrt(mean(.x$residuals^2))), # extract RMSE across populations
+         cAIC = map(model, ~fun_get_caic(.x)), # extract cAIC
+         logLik = map(model, ~fun_get_log(.x)) # extract logLik
+         ) %>%
+  unnest(cAIC, logLik, RMSE) %>% 
+    mutate(coef = map(model, ~coef(.x)),
+           terms_count = map(model, ~length(fixef(.x))+1), # extract number of parameters and add 1 for the grouping variable (for more details see Pinheiro and Bates 2000, p. 8)
+           RMSE = as.numeric(RMSE),
+           delta_total_cAIC = cAIC - min(cAIC))
+```
+
+```{r extract-results, include=TRUE, echo=TRUE}
+#| code-fold: true
+
+# extract RMSE
+selection_parameters <- models %>% 
+  select(-tidy, -augment, -data, -terms) %>% 
+  mutate(calls = map(model, ~deparse(.x[["call"]]) %>% paste(collapse = " ")) %>% as.character(), # extract calls
+         fixed_effects = map(model, ~deparse(.x[["terms"]]) %>% paste(collapse = " ")) %>% as.character(), # extract fixed effects
+         random_effects = map(model, ~.x[["call"]][["random"]]) %>% as.character()) %>% # extract random effects
+  select(model_name, RMSE, cAIC, logLik, terms_count, calls, fixed_effects, random_effects) %>%
+  unnest(RMSE, cAIC, logLik, terms_count) %>%
+  # add family and type
+  mutate(type = case_when(str_detect(model_name, "temp_test") ~ "effect shape",
+                          str_detect(model_name, "ref_true") ~ "traditional reference",
+                          str_detect(model_name, "ref_imp") ~ "refined reference",
+                          str_detect(model_name, "final") ~ "final model",
+                          str_detect(model_name, "best") ~ "best model",
+                          str_detect(model_name, "global") ~ "global model",
+                          str_detect(model_name, "pars") ~ "parsimonious model",
+                          TRUE ~ "other"),
+         family = case_when(str_detect(model_name, "con") ~ "conservative",
+                            str_detect(model_name, "mai") ~ "mainstream",
+                            TRUE ~ "other")) %>%
+  mutate(d.cAIC_absolute = cAIC - min(cAIC)) %>% 
+  group_by(family, type) %>%
+  # add delta value per group
+  mutate(d.cAIC_group = cAIC - min(cAIC),
+         d.RMSE_group = RMSE - min(RMSE)) %>% 
+  ungroup()
+
+# extract coefficients and p-values
+tidy <- models %>% select(tidy) %>% unnest(tidy)
+
+# extract fitted, fixed and residuals
+augment <- models %>% select(augment) %>% unnest(augment)
+
+# extract standard deviation of random effects
+std_random <- models %>% select(model_name, std_random) %>% unnest(std_random) %>% pivot_wider(names_from = PARAMETER, values_from = VALUE)
+
+res_random <- models %>% select(model_name, res_random) %>% mutate(res_random = as.numeric(res_random))
+```
+
+
+```{r format-coefficients}
+coeff_table <- tidy %>%
+  mutate_if(is.numeric, signif, digits = 3) %>%
+  mutate(visual = case_when(estimate > 0 & p.value <= 0.05 ~ "\U1F87D",
+                            estimate > 0 & p.value >= 0.05 ~ "\U1F865",
+                            estimate < 0 & p.value <= 0.05 ~ "\U1F87E",
+                            estimate < 0 & p.value >= 0.05 ~ "\U1F866"),
+         category = label_fun_sim(term, "category"),
+         label = label_fun_sim(term, "short"),
+         SPECIES = species) %>%
+    select(category, label, model_name, visual, conf.low, estimate, conf.high, std.error, statistic, p.value, term, SPECIES)
+```
+
+
+```{r save-output}
+write_csv(coeff_table, paste0(path_output_data, "/table_", species, "_", gsub(" ", "_", phase), ".csv"))
+
+saveRDS(bind_rows(plot_weightd2, plot_weightd4) %>% ungroup(), paste0(path_output_data, "/weights_", species, "_", gsub(" ", "_", phase), ".rds"))
+
+saveRDS(con_var, paste0(path_output_data, "/con_variations_", species, "_", gsub(" ", "_", phase), ".rds"))
+
+saveRDS(results_temp_test %>% mutate(SPECIES_SHORT = species) %>% ungroup (), paste0(path_output_data, "/results_temp_test_", species, "_", gsub(" ", "_", phase), ".rds"))
+
+saveRDS(models %>% mutate(SPECIES_SHORT = species) %>% ungroup(), paste0(path_output_data, "/models_", species, "_", gsub(" ", "_", phase), ".rds"))
+
+augment <- augment %>%  mutate(across(where(is.matrix), ~ .[,1]))
+saveRDS(augment, paste0(path_output_data, "/augment_", species, "_", gsub(" ", "_", phase), ".rds"))
+
+saveRDS(selection_parameters %>% mutate(SPECIES_SHORT = species) %>% ungroup(), paste0(path_output_data, "/selection_parameters_", species, "_", gsub(" ", "_", phase), ".rds"))
+```

@@ -1,0 +1,905 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: inline
+execute:
+    freeze: false
+---
+
+# Species comparison
+
+```{r source, include=FALSE}
+location <- paste0(getwd())
+source(paste0("../00_helpers/setup.R")) #common libraries and custom functions
+source(paste0("../00_helpers/species_and_phases.R"))
+
+lib_results <- c(
+  "ggeffects",
+  "nlme",
+  "cowplot",
+  "ggtext",
+  "ggh4x" # nested facets
+  )
+package_fun(lib_results, "results2")
+
+type <- "con"
+```
+
+
+```{r load-table, include=FALSE}
+coeff_table <- list.files(path = paste0(path_output_data),
+                     pattern = "^table.*\\.csv$",
+                     full.names = TRUE) %>%
+  setNames(nm = sapply(basename(.), function(x) {
+    parts <- unlist(strsplit(x, "_"))
+    paste(parts[1:2], collapse = "_")
+  })) %>%
+  lapply(read.csv) %>% 
+  bind_rows() %>%
+  unite("GROUP", model_name, SPECIES, sep="_", remove=FALSE)
+```
+
+```{r format-p-table}
+p_table <- coeff_table %>% 
+  mutate(SPECIES_SHORT = SPECIES,
+         SPECIES = recode(SPECIES_SHORT, !!!rename_species_en),
+         label = label_fun_sim(term, "short"),
+         PARAMETER = label) %>% 
+  arrange(SPECIES,
+          str_detect(term, "sd_"),
+          str_detect(term, "Intercept"),
+          str_detect(term, "TREE_HEIGHT"),
+          str_detect(term, "DROUGHT"),
+          str_detect(term, "ELEVATION"),
+          str_detect(term, ":"),
+          str_detect(term, "CDD"),
+          str_detect(term, "GDD"),
+          term) %>% 
+  mutate(across(where(is.numeric), ~ round(.x, 3))) %>%
+  mutate(p.value = as.character(p.value),
+         p.value = case_when(p.value == 0.000 ~ "≤ 0.001",
+                             TRUE ~ p.value))
+
+saveRDS(p_table, paste0(path_output_data, "/p_table.rds"))
+
+p_table_test <- p_table %>%
+    filter(str_detect(model_name, paste0("temp_test_con_int")))
+
+p_table_refined <- p_table %>%
+    filter(str_detect(model_name, paste0("ref_imp_con_int$")))
+
+p_table_parsimonious <- p_table %>% 
+    filter(str_detect(model_name, paste0("parsimonious_con_d2")))
+
+p_table <- p_table %>%
+    filter(str_detect(model_name, paste0("best_con_1")))
+```
+
+```{r load-augment}
+augment <- list.files(path = paste0(path_output_data),
+                     pattern = "^augment.*\\.rds$",
+                     full.names = TRUE) %>%
+  setNames(nm = sapply(basename(.), function(x) {
+    parts <- unlist(strsplit(x, "_"))
+    paste(parts[1:2], collapse = "_")
+  })) %>%
+  lapply(readRDS) %>% 
+  bind_rows() %>% 
+  unite("GROUP", model_name, SPECIES_SHORT, sep="_", remove=FALSE) %>%
+  filter(str_detect(model_name, paste0(type)))
+```
+
+```{r load-data}
+data_unscaled <- list.files(path = paste0(path_own_data),
+                     pattern = "^data_unscaled.*\\.rds$",
+                     full.names = TRUE) %>%
+  setNames(nm = sapply(basename(.), function(x) {
+    parts <- unlist(strsplit(x, "_"))
+    paste(parts[1:2], collapse = "_")
+  })) %>%
+  lapply(readRDS) %>% 
+  bind_rows()
+```
+
+```{r load-selection-parameters}
+selection_parameters <- list.files(path = paste0(path_output_data),
+                     pattern = "^selection_parameters.*\\.rds$",
+                     full.names = TRUE) %>%
+  lapply(readRDS) %>% 
+  bind_rows() %>% 
+  filter(model_name %like% "con") %>%
+  mutate(type = case_when(model_name %like% "parsimonious.*a" ~ "parsimonious 1",
+                          model_name %like% "parsimonious.*b" ~ "parsimonious 2",
+                          model_name %like% "parsimonious.*c" ~ "parsimonious 3",
+                          TRUE ~ type))
+```
+
+```{r load-con-variations-summary}
+con_var <- list.files(path = paste0(path_output_data),
+                      pattern = "^con_variations_.*\\.rds$",
+                      full.names = TRUE) %>%
+  setNames(nm = sapply(basename(.), function(x) {
+    parts <- unlist(strsplit(x, "_"))
+    paste(parts[3:3], collapse = "_")
+  })) %>%
+  lapply(readRDS) %>% 
+  bind_rows()
+```
+
+```{r load-weights}
+weights_raw <- list.files(path = paste0(path_output_data),
+                     pattern = "^weights_.*\\.rds$",
+                     full.names = TRUE) %>%
+  setNames(nm = sapply(basename(.), function(x) {
+    parts <- unlist(strsplit(x, "_"))
+    paste(parts[1:2], collapse = "_")
+  })) %>%
+  lapply(readRDS) %>% 
+  bind_rows() %>%
+  filter(str_detect(MODEL, paste0(type)))
+```
+
+```{r fun-format-equations}
+label_stats_fun <- function(term) {
+  # strip doy
+  term <- str_replace_all(term, "doy ~", "")
+  # strip 1
+  term <- str_replace_all(term, "\\+\\s*1", "")
+  term <- str_replace_all(term, "1\\s*\\+", "")
+  
+  # Correctly format interactions (replace * and separate interaction terms)
+  term <- str_replace_all(term, "\\:", " * ")  
+  
+  # Remove ', degree = 2' with flexible spaces
+  term <- str_replace_all(term, ",\\s*degree\\s*=\\s*2", "")
+
+  # Remove trailing '1' or '2' after the closing parenthesis
+  term <- str_replace_all(term, "\\)\\s*[12]", ")")
+  
+  # Replace specific variables with formatted labels
+  term <- str_replace_all(term, "CLIM_BALANCE", "CWB")
+  term <- str_replace_all(term, "CDD_conservative", "CDD")
+  term <- str_replace_all(term, "CDD_mainstream", "CDD")
+  term <- str_replace_all(term, "GDD_conservative", "GDD")
+  term <- str_replace_all(term, "GDD_mainstream", "GDD")
+  term <- str_replace_all(term, "TREE_ELEVATION", "Elevation")
+  term <- str_replace_all(term, "TREE_HEIGHT", "Tree height")
+  term <- str_replace_all(term, "STAND_HEIGHT", "Stand height")
+  term <- str_replace_all(term, "EDGE_DISTANCE_IMPUTED", "Distance forest edge imputed")
+  term <- str_replace_all(term, "EDGE_DIST", "Distance forest edge")
+  term <- str_replace_all(term, "SLOPE_ASPECT_HL", "Slope aspect")
+  term <- str_replace_all(term, "SLOPE_INCLINATION_DEG", "Slope inclination")
+  term <- str_replace_all(term, "DROUGHT", "CWB")
+  term <- str_replace_all(term, "AWC", "AWC")
+  term <- str_replace_all(term, "RELIEF", "Relief")
+  term <- str_replace_all(term, "SOCIAL_SITUATION", "Social position")
+  term <- str_replace_all(term, "METEO_ID", "Site")
+  term <- str_squish(term)
+  term
+}
+
+rearrange_terms <- function(expression) {
+  terms <- unlist(strsplit(expression, " \\+ ")) |> trimws()
+
+  interaction_terms <- terms[str_detect(terms, "\\s*\\*\\s*")]
+
+  temp_interaction_terms <- keep(interaction_terms, ~ str_detect(.x, "GDD|CDD"))
+  env_interaction_terms <- setdiff(interaction_terms, temp_interaction_terms)
+
+  other_terms <- setdiff(terms, interaction_terms)
+  all_interaction_terms <- c(temp_interaction_terms, env_interaction_terms)
+  other_terms <- keep(other_terms, ~ !any(str_detect(all_interaction_terms, fixed(.x))))
+
+  gdd_terms <- keep(other_terms, ~ str_detect(.x, "GDD"))
+  cdd_terms <- keep(other_terms, ~ str_detect(.x, "CDD"))
+
+  other_terms_clean <- setdiff(other_terms, c(gdd_terms, cdd_terms))
+
+  reordered_terms <- c(gdd_terms, cdd_terms, temp_interaction_terms, other_terms_clean, env_interaction_terms)
+  paste(reordered_terms, collapse = " + ")
+}
+```
+
+## Variable importance
+
+```{r tbl-conservative-variations}
+#| tbl-cap: Number of conservative model variations with delta cAIC < 4 and < 2.
+
+table <- con_var %>%
+  datatable(rownames = FALSE, filter = 'top', options = list(scrollX = TRUE, pageLength = 10), colnames = c("Species", "sum Δ cAIC < 4" , "sum Δ cAIC < 2" , "max 𝓌ᵢ Δ cAIC < 4", "max 𝓌ᵢ Δ cAIC < 2"))
+table
+```
+
+
+```{r fig-importance, fig.width=7, fig.height=6, fig.cap="Relative variable importance (VI) in high-performing models of leaf unfolding. Shown are the VI of model variations with ΔcAIC < 2 (cAIC = conditional Akaike Information Criterion) relative to the model with the lowest cAIC that contain GDD and ≤ 10 main effects and interactions. A VI of 1 signals high importance relative to other variables, while lower values suggest that a variable appeared in fewer models or models with lower Akaike weights. Variables with the prefix “poly” were modelled with a non-linear relationship to DOY (Methods). The colon (:) indicates an interaction between two variables. Blanks represent variables that were not present in any well-performing models."}
+
+weights <- list.files(path = paste0(path_output_data),
+                     pattern = "^weights.*\\.rds$",
+                     full.names = TRUE) %>%
+  setNames(nm = sapply(basename(.), function(x) {
+    parts <- unlist(strsplit(x, "_"))
+    paste(parts[1:2], collapse = "_")
+  })) %>%
+  lapply(readRDS) %>% 
+  bind_rows() %>%
+  filter(MODEL == "con",
+         DELTA == "D2") %>%
+mutate(
+  SPECIES_SHORT = str_extract(model_id, "(?<=con_)[A-Z]{2}"),
+  SPECIES = recode(SPECIES_SHORT, !!!rename_species_en),
+  order_num = case_when(PARAMETER_ABBR %like% "Elevation" ~ 0, # define parameter order within group
+                        PARAMETER_ABBR %like% "Relief" ~ 1,
+                        PARAMETER_ABBR %like% "Slope inclination)" ~ 2,
+                        PARAMETER_ABBR %like% "Slope inc" ~ 3,
+                        PARAMETER_ABBR %like% "Slope aspect)" ~ 3,
+                        PARAMETER_ABBR %like% "CWB" ~ 15,
+                        PARAMETER_ABBR %like% "poly(AWC)" ~ 15,
+                        PARAMETER_ABBR == "poly(AWC)" ~ 15,
+                        PARAMETER_ABBR %like% "Social" ~ 6,
+                        PARAMETER_ABBR %like% "Stand" ~ 7,
+                        PARAMETER_ABBR %like% "Tree" ~ 8,
+                        PARAMETER_ABBR == "CDD" ~ 9,
+                        PARAMETER_ABBR %like% "CDD:poly\\(GDD\\)" ~ 10,
+                        PARAMETER_ABBR %like% "poly\\(GDD\\)" ~ 11,
+                        PARAMETER_ABBR %like% "CDD:GDD$" ~ 12,
+                        PARAMETER_ABBR == "GDD" ~ 13,
+                        TRUE ~ 0),
+  category = case_when(PARAMETER_ABBR %like% "CWB" ~ "Climate / Soil",
+                              PARAMETER_ABBR %like% "AWC" ~ "Climate / Soil",
+                              category %like% "Temperature" ~ "Climate / Soil",
+                              TRUE ~ category),
+  PARAMETER = fct_reorder(PARAMETER_ABBR, order_num), # apply parameter order within group
+  category = fct_relevel(category, "Stand structure", "Climate / Soil", "Topography", "Other"), # order parameter groups
+  WEIGHT = round(WEIGHT, 2)
+  #PARAMETER = str_remove_all(PARAMETER_ABBR, "[\\(\\)]") %>% str_replace_all(" ", "_")
+  )
+  
+ggplot(weights, aes(x = SPECIES, y = PARAMETER, fill = WEIGHT)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "white", mid = "grey", high = "#9CB51D", midpoint = 0.5, limit = c(0, 1), na.value = NA, name = "VI") +
+  geom_text(aes(label = round(WEIGHT, 2)), size = 3, vjust = 0, colour = "#4F4F4F") +
+  xlab("") +
+  ylab("") +
+  #scale_y_discrete(position = "right") +
+  scale_x_discrete(position = "top") +
+  facet_nested(rows = vars(category), scales = "free_y", space = "free_y", switch = "y") +
+  theme_report(legend.position="right") +
+  theme(
+    legend.title = element_text(size = 12, face = "bold", hjust=0.1),
+    axis.text.x = element_text(hjust = 0.5),
+    strip.background = element_blank(),
+    strip.text = element_text(face = "bold", size = 10, hjust = 0.5),
+    panel.spacing.y = unit(1.5, "lines"),
+    axis.line.y = element_line(colour = "grey", linewidth = 1.2),
+    panel.grid = element_blank()
+    #panel.border = element_rect(color = "grey", fill = NA, linewidth = 0.5)
+    )
+```
+
+## Model selection
+
+
+```{r set-filter-and-order}
+model_filter <- selection_parameters %>%
+  filter(model_name %like% "con", # select conservative 
+         model_name %like% "best_con_1" | model_name %like% "parsimonious_con_d2" | model_name == "ref_imp_con_int" | model_name %like% "ref_true_con_int") %>%
+  pull(model_name)
+
+model_order <- c("best model", "parsimonious 1", "parsimonious 2", "parsimonious 3", "refined reference", "traditional reference")
+```
+
+
+```{r tbl-delta-caic}
+#| tbl-cap: Delta cAIC of best conservative models per type across species.
+
+delta_caic <- selection_parameters %>%
+  select(model_name, type, cAIC, logLik, RMSE, terms_count, SPECIES_SHORT) %>%
+  filter(model_name %in% model_filter) %>%
+  group_by(SPECIES_SHORT) %>%
+  mutate(d.cAIC = cAIC - min(cAIC, na.rm = TRUE),
+         RMSE_PERC = round(100 * RMSE / max(RMSE), 0)) %>%  # recalculate the delta values here to be sure they are correct
+  mutate(type = factor(type, levels = model_order)) %>%
+  arrange(SPECIES_SHORT, type)
+
+saveRDS(delta_caic %>% ungroup(), paste0(path_output_data, "/delta_caic.rds"))
+
+table <- delta_caic %>%
+  mutate_if(is.numeric, round, 2) %>%
+  select(SPECIES_SHORT, type, cAIC, d.cAIC, logLik, RMSE, RMSE_PERC, terms_count) %>%
+  datatable(filter = 'top', options = list(scrollX = TRUE, pageLength = 10), rownames=FALSE, colnames = c("Species", "Model type" , "cAIC", "ΔcAIC" , "log (𝓛)", "RMSE", "% RMSE", "K"))
+table
+```
+
+
+```{r tbl-calls}
+#| tbl-cap: Model formula of best conservative models per type across species.
+
+best_calls <- selection_parameters %>%
+  filter(model_name %in% model_filter) %>%
+  select(model_name, type, fixed_effects, SPECIES_SHORT) %>%
+  pivot_wider(names_from = SPECIES_SHORT, values_from = fixed_effects) %>%
+  mutate(type = factor(type, levels = model_order)) %>% 
+  arrange(type) %>%
+  rename(Beech = FS,
+         Larch = LD,
+         Spruce = PA,
+         Lime = TC) %>%
+  select(-model_name) %>%
+  mutate(across(2:5, label_stats_fun),
+         across(2:5, ~map_chr(.x, rearrange_terms)))
+
+saveRDS(best_calls, paste0(path_output_data, "/calls_selected.rds"))
+
+table <- best_calls %>%
+  mutate_if(is.numeric, round, 2) %>%
+  datatable(filter = 'top', options = list(scrollX = TRUE, pageLength = 10, dom = 'Bfrtip'), rownames=FALSE)
+table
+```
+
+
+## Model prediction accuracy
+
+```{r fig-fixed-vs-observed, fig.width=5, fig.height = 5, fig.cap ="Model prediction accuracy using refined temperature-only models (black) and best models (green) to predict leaf unfolding across populations. Across-population predictions are based solely on fixed effects, excluding random effects and thus representing a generalized prediction. The dashed lines indicate perfect prediction of leaf unfolding, and deviations from it reflect prediction error."}
+ggplot(data_unscaled %>%
+         left_join(augment %>%
+                     select(METEO_ID, year, .fixed, model_name, SPECIES_SHORT), by=c("METEO_ID", "year", "SPECIES_SHORT")) %>%
+         filter(str_detect(model_name, "best_con_1|ref_imp_con_int$") & !str_detect(model_name, "slo")) %>%
+         mutate(SPECIES = recode(SPECIES_SHORT, !!!rename_species_en))) +
+  geom_point(aes(y=.fixed, x= doy, group=model_name, colour=model_name), shape=21, alpha = 0.4)+
+  geom_abline(slope = 1, intercept = 0, color = "black", linetype = "dashed", size = 0.5) +
+  #geom_smooth(aes(y=VALUE, x= doy, group=model_name, colour=model_name), method="loess", se=FALSE)+
+  geom_smooth(aes(y=.fixed, x= doy, group=model_name, colour=model_name), method="lm", se=FALSE)+
+  facet_wrap(~SPECIES, ncol = 2, scales = "fixed") +
+  ylab("Predicted day of year") +
+  xlab("Observed day of year") +
+  scale_colour_manual(
+    values = c("best_con_1" = "#43CD80", "ref_imp_con_int" = "#666666"),
+    labels = c("best_con_1" = "Best model", 
+               "ref_imp_con_int" = "Refined model"))+
+  theme_report(legend.position="top", angle=90) +
+  theme(strip.background = element_rect(fill = NA, colour = NA, size = 1),
+        strip.text = element_markdown(hjust = 0.5, face = "bold"),
+        panel.border = element_rect(color = "#CCCCCC", fill = NA, linewidth=0.005))
+```
+
+
+
+
+## Coefficients
+
+
+
+```{r coeff-plot-fun}
+coeff_fun <- function(data, filter_string, facet, rows) {
+  filtered_data <- data %>%
+    filter(
+      !term %like% "sd",
+      !term %like% "cor",
+      !term %like% "Intercept",
+      str_detect(model_name, filter_string)
+    ) %>%
+    arrange(term) %>%
+    mutate(
+      term = factor(term, levels = unique(term)),
+      label = factor(label, levels = unique(label)),
+      significance = factor(ifelse(p.value < 0.05, "significant", "not significant"), 
+                            levels = c("significant", "not significant"))
+    )
+  
+  ggplot(filtered_data, aes(x = estimate, y = label)) +
+    geom_vline(xintercept = 0, linetype = "dashed", size = 1, colour = "grey") +
+    geom_pointrange(aes(xmin = conf.low, xmax = conf.high, colour=significance), 
+                    position=position_jitter(width=0.5), shape=21) +
+    scale_colour_manual(values = c("significant" = "#008B00", "not significant" = "grey")) +
+    guides(colour = guide_legend(title = NULL)) +
+    facet_wrap(as.formula(paste0("~", facet)), scales = "free_x", nrow = rows) +
+    ylab("") +
+    xlab("Estimate") +
+    theme(panel.border = element_rect(color = "grey", fill = NA, size = 0.4)) +
+    theme_report(legend.position = "top", angle = 90)
+}
+```
+
+
+### Reference models
+
+Reference models with random slopes for warming and chilling never converged, even when warming was simplified to a linear term only. Models with a random slope for warming but not chilling converged only for Larix decidua and Tilia cordata, but not Picea abies and Fagus sylvatica. In general reference models for Fagus sylvatica had more conversion issues than reference models of other species.
+
+```{r fig-forrest-reference, fig.cap="Coefficient estimate and standard error per term for all zero models.", fig.retina=2}
+coeff_fun(coeff_table, "ref_imp", "SPECIES", 1)
+```
+
+
+```{r tbl-coefficients-refined}
+#| tbl-cap: Coefficient estimates, confidence limits of 95% confidence intervals (conf.low, conf.high), standard error (SE) of coefficient estimates and p-values of refined models. The terms sd Intercept and sd Residuals describe the standard deviation of the random intercept and the residuals.
+
+tbl <- p_table_refined %>%
+    select(SPECIES, PARAMETER, everything(), -term, -model_name, -statistic, -category, -visual, -SPECIES_SHORT, -label, -GROUP) %>% 
+    datatable(filter = 'top', options = list(scrollX = TRUE, pageLength = 10), rownames=FALSE, colnames = c("Species", "Predictor", "conf.low", "estimate" , "conf.high", "SE", "p-value")
+)
+tbl
+```
+
+
+### Best models
+
+
+
+```{r tbl-coefficients-best}
+#| tbl-cap: Coefficient estimates, confidence limits of 95% confidence intervals (conf.low, conf.high), standard error (SE) of coefficient estimates and p-values of best models. The terms sd Intercept and sd Residuals describe the standard deviation of the random intercept and the residuals. The reference levels for relief position and social situation are “upper slope” and “forest”, respectively.
+
+tbl <- p_table %>%
+    select(SPECIES, PARAMETER, everything(), -term, -model_name, -statistic, -category, -visual, -SPECIES_SHORT, -label, -GROUP) %>% 
+    datatable(filter = 'top', options = list(scrollX = TRUE, pageLength = 10), rownames=FALSE, colnames = c("Species", "Predictor" , "conf.low", "estimate" , "conf.high", "SE", "p-value")
+)
+tbl
+```
+
+### Parsimonious models
+
+
+
+```{r tbl-coefficients-pars}
+#| tbl-cap: Coefficient estimates, confidence limits of 95% confidence intervals (conf.low, conf.high), standard error (SE) of coefficient estimates and p-values of most parsimonious models. The terms sd Intercept and sd Residuals describe the standard deviation of the random intercept and the residuals. The reference levels for relief position and social situation are “upper slope” and “forest”, respectively.
+
+tbl <- p_table_parsimonious %>%
+  mutate(model_name = case_when(model_name %like% "parsimonious.*a" ~ "parsimonious 1",
+                                model_name %like% "parsimonious.*b" ~ "parsimonious 2",
+                                model_name %like% "parsimonious.*c" ~ "parsimonious 3",
+                                TRUE ~ model_name)) %>%
+  arrange(SPECIES, model_name) %>% 
+  select(SPECIES, model_name, PARAMETER, everything(), -term, -statistic, -category, -visual, -SPECIES_SHORT, -label, -GROUP) %>% 
+  datatable(filter = 'top', options = list(scrollX = TRUE, pageLength = 10), rownames=FALSE, colnames = c("Species", "Model", "Predictor" , "conf.low", "estimate" , "conf.high", "SE", "p-value"))
+tbl
+```
+
+
+## Effects of variables
+
+
+```{r load-all-models}
+all_models <- list.files(path = paste0(path_output_data),
+                     pattern = "^models.*\\.rds$",
+                     full.names = TRUE) %>%
+  lapply(readRDS) %>% 
+  bind_rows()
+```
+
+```{r fun-process-and-predict-all-models}
+process_and_predict_df <- function(model_df, family) {
+  predictions_df <- NULL
+  filtered_model_df <- model_df %>% filter(str_detect(model_name, family))
+    
+  random_simple <- readRDS(paste0(path_output_data, "/random_simple.rds"))
+  assign("random_simple", random_simple, envir = .GlobalEnv)
+    
+  autoregression_simple <- readRDS(paste0(path_output_data, "/autoregression_simple.rds"))
+  assign("autoregression_simple", autoregression_simple, envir = .GlobalEnv)
+  
+  for (i in seq_len(nrow(filtered_model_df))) {
+    model <- filtered_model_df$model[[i]] # filter model
+    fixed_effects <- formula(model) # get fixed effects
+    model[["call"]][["fixed"]] <- as.formula(fixed_effects) # paste fixed effect back into the model to replace "fixed effects"
+    terms <- filtered_model_df[["terms"]][[i]] # get terms
+
+    for (term in terms) {
+      # make prediction
+      prediction <- tryCatch({
+        predict_response(model, terms = paste(term, "[all]", sep = " "))
+      }, error = function(e) {
+        NULL  # Return NULL on error
+      }) %>%
+        as.data.frame() %>% # transform prediction output to data frame
+        mutate(model_name = paste0(filtered_model_df$model_name[[i]]), # add model name
+               SPECIES_SHORT = paste0(filtered_model_df$SPECIES_SHORT[[i]])) # add species
+      
+      if (!is.null(prediction)) {
+        prediction$x <- as.numeric(as.character(prediction$x))
+        #prediction$Model <- species
+        prediction$Term <- term
+        
+        if (is.null(predictions_df)) {
+          predictions_df <- prediction
+        } else {
+          predictions_df <- bind_rows(predictions_df, prediction) %>% as.data.frame() %>% mutate(Label = label_fun_sim(Term, col = "short"))
+        }
+      }
+    }
+  }
+  
+  predictions_df
+}
+
+saveRDS(process_and_predict_df, paste0(path_helpers, "/process_and_predict_df.rds"))
+```
+
+
+```{r extract-effects-best-con, include=FALSE}
+# categoric variables
+models_categoric <-  all_models %>% filter(model_name == "best_con_1", SPECIES_SHORT == "LD")
+
+random_simple <- readRDS(paste0(path_output_data, "/random_simple.rds"))
+  assign("random_simple", random_simple, envir = .GlobalEnv)
+    
+autoregression_simple <- readRDS(paste0(path_output_data, "/autoregression_simple.rds"))
+  assign("autoregression_simple", autoregression_simple, envir = .GlobalEnv)
+
+effects_relief <- predict_response(models_categoric[[3]][[1]], terms = "RELIEF [all]", sep = " ") %>%
+  as.data.frame() %>%
+  mutate(Term = "RELIEF",
+         SPECIES_SHORT = "LD")
+
+effects_social <- predict_response(models_categoric[[3]][[1]], terms = "SOCIAL_SITUATION [all]", sep = " ") %>%
+  as.data.frame() %>%
+  mutate(Term= "SOCIAL_SITUATION",
+         SPECIES_SHORT = "LD")
+
+effects_best_con_categoric <- bind_rows(effects_social, effects_relief) %>%
+  mutate(PARAMETER = label_fun_sim(as.character(Term)),
+         Label = label_fun_sim(as.character(Term), col = "short"),
+         SPECIES = recode(SPECIES_SHORT, !!!rename_species_en))
+
+# numeric variables
+effects_best_con_numeric <- process_and_predict_df(all_models, "best_con_1") %>%
+  mutate(Label = label_fun_sim(as.character(Term), col = "short"))
+```
+
+```{r effect-size-best-con}
+# standardize effect size and estimate potential effect on net ecosystem productivity in CO2
+effects_best_numeric <- effects_best_con_numeric %>% mutate(x = as.character(x))
+effects_best_categoric <- effects_best_con_categoric %>% mutate(x = as.character(x))
+
+effect_size_best <- bind_rows(effects_best_numeric, effects_best_categoric) %>%
+  group_by(SPECIES_SHORT, Term, Label) %>%
+  summarise(MAX_MEAN_EFFECT_SIZE = round(max(predicted) - min(predicted), 2),
+            MEAN_STD_ERROR = round(mean(std.error), 2),
+            MIN_TERM = x[which.min(predicted)],
+            MAX_TERM = x[which.max(predicted)],
+            CARBON_PREDICTION = MAX_MEAN_EFFECT_SIZE * 4) %>%
+  arrange(desc(CARBON_PREDICTION)) %>%
+  filter(!is.na(Label),# remove excess labels from categoric variables
+         MAX_MEAN_EFFECT_SIZE > 0) %>% 
+  rename(PARAMETER = Term) %>% 
+  mutate(SPECIES = recode(SPECIES_SHORT, !!!rename_species_en)) %>%
+  ungroup() %>% 
+  select(Label, SPECIES, everything())
+
+saveRDS(effect_size_best %>% ungroup(), paste0(path_output_data, "/effect_size_best_con.rds"))
+```
+
+```{r fig-effect-size, fig.height=5, fig.width=6, fig.cap="Estimated shift (d) between earliest and latest DOY across the observed range of each environmental variable, based on predictions adjusted to mean covariate values. For each species, colours are scaled so the darkest shade represents the strongest shift."}
+facet_stats <- effect_size_best %>%
+  group_by(SPECIES) %>%
+  summarise(
+    min_val = min(MAX_MEAN_EFFECT_SIZE, na.rm = TRUE),
+    max_val = max(MAX_MEAN_EFFECT_SIZE, na.rm = TRUE),
+    mid_val = mean(MAX_MEAN_EFFECT_SIZE, na.rm = TRUE),
+    .groups = "drop")
+
+effect_scaled <- effect_size_best %>%
+  left_join(facet_stats, by = "SPECIES") %>%
+  mutate(scaled_effect = (MAX_MEAN_EFFECT_SIZE - min_val) / (max_val - min_val)) %>%
+  inner_join(label_table %>% select(term, param_order_c1, category), by = c("PARAMETER" = "term")) %>% # partial join with order of parameters
+  mutate(category = case_when(category == "Soil" ~ "Climate / Soil",
+                              category == "Drought" ~ "Climate / Soil",
+                              category == "Climate" ~ "Climate / Soil",
+                              TRUE ~ category),
+         Label = case_when(Label %like% "Social" ~ "Social position",
+                          TRUE ~ Label),
+         order_num = case_when(PARAMETER %like% "ELEVATION" ~ 0, # define parameter order within group
+                        PARAMETER %like% "RELIEF" ~ 1,
+                        PARAMETER %like% "INCLINATION" ~ 2,
+                        PARAMETER %like% "ASPECT" ~ 3,
+                        PARAMETER %like% "SOCIAL" ~ 6,
+                        PARAMETER %like% "STAND" ~ 7,
+                        PARAMETER %like% "HEIGHT" ~ 8,
+                        PARAMETER %like% "DROUGHT" ~ 13,
+                        PARAMETER %like% "AWC" ~ 12,
+                        PARAMETER %like% "CDD" ~ 10,
+                        PARAMETER %like% "GDD" ~ 11,
+                        TRUE ~ 0),
+         PARAMETER = fct_reorder(Label, order_num),
+        category = fct_relevel(category, "Stand structure", "Climate / Soil", "Topography")) # order parameter groups
+
+ggplot(effect_scaled, aes(x = SPECIES, y = PARAMETER, fill = scaled_effect)) +
+  geom_tile() +
+  scale_fill_gradient2(
+    low = "#FFA54F", mid = "#FF7F24", high = "#CD661D", midpoint = 0.5, limits = c(0, 1)) +
+  geom_text(aes(label = round(MAX_MEAN_EFFECT_SIZE, 2)), size = 4, vjust = 0, colour = "#4F4F4F") +
+  xlab("") +
+  ylab("") +
+  scale_x_discrete(position = "top") +
+  facet_nested(rows = vars(category), scales = "free_y", space = "free_y", switch = "y") +
+  theme_report(legend.position = "none") +
+  theme(
+    legend.title = element_text(size = 12, face = "bold", hjust = 0.1),
+    axis.text.x = element_text(hjust = 0.5, face = "bold"),
+    strip.background = element_blank(),
+    strip.text.y.left = element_text(face = "bold", size = 10, hjust = 0.5, colour = "#757575"),
+    panel.spacing.y = unit(1.1, "lines"),
+    axis.line.y = element_line(colour = "grey", linewidth = 1.2),
+    panel.grid = element_blank()
+  )
+```
+
+```{r effects-nature-fun}
+theme_nature <- function() {
+  theme(
+    legend.position = "none",
+    axis.text.x = element_text(size = 10, vjust = 0.5, hjust = 0.5),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank(),
+    strip.background = element_rect(fill = NA, colour = NA, size = 1),
+    panel.spacing = unit(1, "lines"),
+    strip.text = element_markdown(hjust = 0),
+    plot.title = element_text(size = 10),
+    axis.title.x = element_text(size = 10.5),
+    plot.margin = margin(t = 10, b = 10, r = 3, l = 3),
+    panel.border = element_rect(color = "#E8E8E8", fill = NA, linewidth=1.5),
+    panel.grid.minor = element_blank()
+  )
+}
+
+# numeric plots
+effects_fun_num <- function(data, label, type = "line"){
+  data <- data %>%
+    mutate(SPECIES = recode(SPECIES_SHORT, !!!rename_species_en)) %>%
+      filter(!is.na(x))
+  
+  terms <- unique(data$Term)
+  
+  plots <- list()
+  
+  for (i in terms) {
+    plot_data <- data %>%
+      filter(Term == i)
+
+    p <- ggplot(plot_data, aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high)) +
+      geom_line(size = 1, aes(group = interaction(SPECIES, model_name), colour = SPECIES)) +
+      geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill = SPECIES_SHORT, group = interaction(SPECIES, model_name)), 
+                  fill = "grey", alpha = 0.3, color = NA) +
+      labs(x = paste0(" ", unique(plot_data$Label)), y = "") +
+      coord_cartesian(ylim = c(65, 150))+
+      #ylim(60, 160)+
+      #ggtitle(paste0(" ", unique(plot_data$Letters), unique(plot_data$Label))) +
+      ggtitle(paste0(" ")) +
+      species_color_scale(paste0(label)) +
+      theme_report() +
+      theme_nature()
+    
+     plots[[i]] <- p
+  }
+    return(plots)
+}
+
+# categorical plots
+effects_fun_cat <- function(data, label, type = "line"){
+  terms <- unique(data$Term)
+  
+  plots <- list()
+  
+  data <- data %>%
+    mutate(SPECIES = recode(SPECIES_SHORT, !!!rename_species_en))
+  
+  for (i in terms) {
+    order <- c("flat", "base", "mid", "upper", "free", "group", "forest")
+    
+    plot_data <- data %>%
+      filter(Term == i) %>%
+      mutate(x = case_when(x %like% "crest" ~ "upper",
+                           x %like% "base" ~ "base",
+                           x %like% "mid" ~ "mid",
+                           x %like% "stand" ~ "free",
+                           TRUE ~ x), 
+             x = factor(x, levels = c(order, setdiff(unique(x), order))))
+
+    p <- ggplot(plot_data, aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high)) +
+      geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.2, colour= "grey") +
+      geom_point(aes(colour = SPECIES), size = 2.5) +
+      labs(x = paste0(" ", unique(plot_data$PARAMETER)), y = "") +
+      coord_cartesian(ylim = c(65, 150))+
+      #ylim(60, 160)+
+      #ggtitle(paste0(" ", unique(plot_data$PARAMETER))) +
+      ggtitle(paste0(" ")) +
+      species_color_scale(paste0(label)) +
+      theme_report() +
+      theme_nature()
+
+     plots[[i]] <- p
+  }
+    return(plots)
+}
+```
+
+```{r generate-plots}
+# Generate numeric and categorical plots
+plots_num_all <- effects_fun_num(effects_best_con_numeric, "english")
+plots_cat_par <- effects_fun_cat(effects_best_con_categoric, "english")
+
+# Extract legend from the numeric plot
+g_bottom <- ggplotGrob(plots_num_all[["GDD_conservative"]] + theme(legend.position = "bottom"))
+legend_grob_bottom <- g_bottom$grobs[which(sapply(g_bottom$grobs, function(x) x$name) == "guide-box")][[1]]
+plot_legend_bottom <- ggdraw() + draw_grob(as_grob(legend_grob_bottom))
+
+# Extract legend from the numeric plot
+g_right <- ggplotGrob(plots_num_all[["GDD_conservative"]] + theme(legend.position = "right"))
+legend_grob_right <- g_right$grobs[which(sapply(g_right$grobs, function(x) x$name) == "guide-box")][[1]]
+plot_legend_right <- ggdraw() + draw_grob(as_grob(legend_grob_right))
+
+# Bind elements
+plots_list <- c(plots_num_all, plots_cat_par, list(Legend = plot_legend_right) # add legend as object if it should be treated as a plot
+                )
+
+# add axis labels to left side plots
+plots_list[names(plots_list) %in% c("TREE_HEIGHT", "SLOPE_ASPECT_HL", "DROUGHT")] <-
+  map(plots_list[names(plots_list) %in% c("TREE_HEIGHT", "SLOPE_ASPECT_HL", "DROUGHT")],
+      ~ .x + theme(axis.text.y = element_text(), axis.ticks.y = element_line()))
+
+# Order plots
+desired_order <- c("TREE_HEIGHT", "STAND_HEIGHT",
+                   "SOCIAL_SITUATION", "AWC", "DROUGHT", "RELIEF", 
+                   "SLOPE_ASPECT_HL", "SLOPE_INCLINATION_DEG", "TREE_ELEVATION",#, "Legend" # add legend as object if it should be treated as a plot
+                   "GDD_conservative", "CDD_conservative", "Legend")  
+
+ordered_plots <- plots_list[desired_order]
+
+#letters_list[length(letters_list)] <- ""  # Remove letter assigned to legend legend if legend is treated as a plot
+```
+
+```{r order-plots-thematic}
+# Define plot groupings
+group_titles <- c(
+  "Stand structure",
+  "Climate / Soil",
+  "Topography"
+#  "Temperature"
+)
+
+# Split ordered plots into thematic rows
+plot_rows <- list(
+  ordered_plots[c("TREE_HEIGHT", "STAND_HEIGHT", "SOCIAL_SITUATION", "Legend")],
+  ordered_plots[c("DROUGHT", "AWC", "GDD_conservative", "CDD_conservative")],
+  ordered_plots[c("SLOPE_ASPECT_HL", "SLOPE_INCLINATION_DEG", "RELIEF", "TREE_ELEVATION")])
+
+flat_plots <- unlist(plot_rows, recursive = FALSE)
+# Determine where the "Legend" is
+legend_pos <- which(names(flat_plots) == "Legend")
+
+# Create letters and insert "" at the right spot
+panel_letters <- letters[1:(length(flat_plots) - 1)]
+panel_letters <- append(panel_letters, "", after = legend_pos - 1)
+
+# Define max columns (based on longest row)
+max_cols <- max(lengths(plot_rows))
+
+n_rows <- length(plot_rows)
+n_cols <- max_cols
+
+x_positions <- rep(seq(0.121, 0.833, length.out = n_cols), times = n_rows)
+y_positions <- rep((seq(1, 0.33, length.out = n_rows)), each = n_cols)
+
+# Function to pad a row to fixed width
+pad_row <- function(plots, total_cols = max_cols) {
+  n_missing <- total_cols - length(plots)
+  if (n_missing > 0) {
+    plots <- c(plots, rep(list(NULL), n_missing))  # pad with empty slots
+  }
+  return(plots)
+}
+
+plot_object <- tibble(
+  order = flat_plots[names(flat_plots)],
+  parameter = names(order),
+  letters = panel_letters)
+```
+
+```{r fig-effects-best-all-thematic, fig.width=11, fig.height=7, fig.cap="Species-specific environmental drivers beyond temperature shape the timing of leaf unfolding. Panels show the estimated effect of predictors present in species-specific best models, adjusted for the influence of other included covariates at their mean values. Shaded areas and error bars represent 95% confidence intervals."}
+# Adjusted label drawer with rotation
+rotated_label <- function(label_text) {
+  ggdraw() + 
+    draw_label(
+      label_text,
+      angle = 90,               # rotate
+      hjust = 0.5,              # center vertically
+      vjust = 0.5,
+      size = 13
+      ) + #fontface = "bold"
+    theme(plot.margin = margin(t = 0, r = -30, b = 0, l = 0))  # pulls label closer
+}
+
+rotated_label <- function(label_text) {
+  ggdraw() + 
+    draw_line(                     # vertical line
+      x = c(-0.3, -0.3),
+      y = c(0.05, 0.95),
+      size = 1.2,
+      color = "grey"
+    ) +
+    draw_label(
+      label_text,
+      angle = 90,
+      hjust = 0.5,
+      vjust = 0.5,
+      size = 13
+    ) +
+    theme(plot.margin = margin(t = 0, r = -20, b = 0, l = 0))
+}
+
+# adjust for column with narrow plots due to axis labels
+aligned_plot_rows <- map(plot_rows, ~ align_plots(plotlist = pad_row(.x), align = "hv", axis = "tblr"))
+
+annotated_rows <- map2(aligned_plot_rows, group_titles,
+  ~ plot_grid(
+      rotated_label(.y),
+      plot_grid(plotlist = .x, ncol = max_cols),
+      ncol = 2,
+      rel_widths = c(0.02, 0.99),
+      align = "v",
+      axis = "tb"))
+
+# Combine into final layout
+final_plot <- plot_grid(
+  plotlist = annotated_rows,
+  ncol = 1,
+  rel_heights = rep(1, length(annotated_rows)))  # uniform row heights
+
+final_plot_labeled <- ggdraw() +
+  draw_plot(final_plot, x = 0.05, y = 0, width = 0.97, height = 1) +  # shift right to make room
+  draw_label(
+    "Day of year",
+    x = 0.01, y = 0.5,
+    angle = 90,
+    fontface = "bold",
+    size = 16)
+
+final_plot_labeled_with_letters <- ggdraw() +
+  draw_plot(final_plot_labeled) +
+  draw_plot_label(
+    label = panel_letters,  # <- reverse here
+    x = x_positions,
+    y = y_positions,
+    size = 14,
+    fontface = "bold") +
+  theme(plot.margin = margin(r = 30))
+
+final_plot_labeled_with_letters
+```
+
+
+### Effects of interactions
+
+```{r interaction-effect-fun}
+interaction_effect_fun <- function(model_string, species_string, term_string, lab_string, legend_string = c("low", "medium", "high"), color_string = c("#FF7F00", "#698B22", "#1874CD")){
+
+filtered_models <- all_models %>% filter(str_detect(model_name, model_string), str_detect(SPECIES_SHORT, species_string))
+prediction <- predict_response(filtered_models$model[[1]], term = term_string)
+  
+ggplot(prediction, aes(x = x, y = predicted)) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, group = group), 
+                fill = "grey", alpha = 0.3, color = NA)+
+  geom_line(size = 1, aes(group = factor(group), colour = factor(group))) +
+  labs(x = lab_string, y = "Day of year", colour = "Group") +
+  scale_color_manual(values = color_string, labels = legend_string) +
+  guides(colour = guide_legend(reverse = TRUE)) + # Reverse the legend order
+  theme_report(legend.position = "top", hjust = 0.5) +
+  theme_nature()
+}
+```
+
+```{r fig-effects-warming-chilling-tc1, fig.width = 4, fig.height = 4, fig.cap="Effect of the interaction between GDD and CDD at low, medium and high CDD in the best model of lime. Predictions are adjusted to mean covariate values, with 95% confidence intervals (grey)."}
+interaction_effect_fun("best_con_1", "TC", c("GDD_conservative [all]", "CDD_conservative"), "Growing degree days (°C day)", c("low CDD", "medium CDD", "high CDD")) +
+  theme_nature()+
+  theme(legend.position = "top")
+```
+
+```{r fig-effects-awc-cwb, fig.width = 4, fig.height = 4, fig.cap="Effect of the interaction between AWC and CWB at low, medium and high AWC in the best model of spruce. Predictions are adjusted to mean covariate values. Shaded areas represent 95% confidence intervals."}
+interaction_effect_fun("best_con_1", "PA", c("DROUGHT [all]", "AWC"), "Climatic water balance (mm)", c("low AWC", "medium AWC", "high AWC")) + 
+  theme_nature()+
+  theme(legend.position = "top")
+```
+
+
+```{r save-output}
+saveRDS(model_filter, paste0(path_output_data, "/model_filter.rds"))
+saveRDS(plot_object, paste0(path_output_data, "/facet_reference.rds"))
+```

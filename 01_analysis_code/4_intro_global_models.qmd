@@ -1,0 +1,384 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: inline
+execute:
+    freeze: false
+---
+
+# Models
+
+This section describes the modelling process and the model groups reference, global and final models.
+
+```{r source, include=FALSE}
+location <- paste0(getwd())
+source(paste0("../00_helpers/setup.R")) #common libraries and custom functions
+source(paste0("../00_helpers/species_and_phases.R"))
+
+lib_modelling <- c(
+  "nlme",
+  "MuMIn",
+  "cAIC4"
+  )
+package_fun(lib_modelling, "modelling")
+```
+
+
+## Technical implementation
+
+Random effects as well as autoregressive parameters for all models and complex fixed effects for the global models were stored in objects and supplied to the different models.
+
+### Universal random effects
+
+In all models the grouping variable METEO_ID was used. Nested groupings to account for different observers were not possible due to insufficient observer levels within the same time series.
+
+```{r random-simple, echo=TRUE, filename="Random effect."}
+random_simple <- as.formula(~ 1 | METEO_ID)
+saveRDS(random_simple, paste0(path_output_data, "/random_simple.rds"))
+```
+
+### Universal autoregressive parameter
+
+An autoregressive parameter was used to account for the temporal autocorrelation in the residuals. The parameter was estimated for each METEO_ID.
+
+```{r autoregressive-parameter, echo=TRUE, filename="Autoregressive parameter."}
+autoregression_simple <- corAR1(form = ~ year | METEO_ID)
+saveRDS(autoregression_simple, paste0(path_output_data, "/autoregression_simple.rds"))
+```
+
+## Reference models
+
+The **traditional reference** models contain only a linear warming term. They represent the typical approach to analyse phenological data. I then tested whether the temperature terms are in fact linear, polynomial or whether both terms are required. Consequently the **refined reference** models contain a linear and a quadratic warming term with or without a cooling term. They serve as a contrast for additional parameters such as tree height or stand height.
+
+```{r generate-traditional-reference-models, echo=TRUE}
+for (phase in phase_list) {
+  for (species in species_list) {
+    
+    data <- readRDS(paste0(path_own_data, "/data_unscaled_", species, "_", gsub(" ", "_", phase), ".rds")) %>%
+      rename_fun() %>%
+      select(-LEAF_COLOURING_LAG) %>%
+      filter(complete.cases(.)) %>%
+      mutate(RELIEF = factor(RELIEF),
+             SOCIAL_SITUATION = factor(SOCIAL_SITUATION))
+    
+    random_simple <- readRDS(paste0(path_output_data, "/random_simple.rds"))
+    autoregression_simple <- readRDS(paste0(path_output_data, "/autoregression_simple.rds"))
+    
+    models <- list(
+      ref_true_mai_int = tryCatch(
+        lme(fixed = doy ~ GDD_mainstream, 
+            random = ~ 1 | METEO_ID, data = data, method = "ML", correlation = autoregression_simple),
+        error = function(e) NULL),
+      
+      ref_true_con_int = tryCatch(
+        lme(fixed = doy ~ GDD_conservative, 
+            random = ~ 1 | METEO_ID, data = data, method = "ML", correlation = autoregression_simple),
+        error = function(e) NULL),
+      
+      ref_true_mai_slo = tryCatch(
+        lme(fixed = doy ~ GDD_mainstream,
+            random = ~ 1 + GDD_mainstream | METEO_ID, data = data, method = "ML", correlation = autoregression_simple),
+        error = function(e) NULL),
+
+      ref_true_con_slo = tryCatch(
+        lme(fixed = doy ~ GDD_conservative,
+            random = ~ 1 + GDD_conservative | METEO_ID, data = data, method = "ML", correlation = autoregression_simple),
+        error = function(e) NULL)
+      )
+   
+      if (!is.null(models)) {
+        saveRDS(models, paste0(path_output_data, "/ref_true", "_", species, "_", gsub(" ", "_", phase), ".rds"))
+      } else {
+        message("Something for ", species, " ", phase, " failed.")
+      }
+    }
+  }
+```
+
+```{r generate-temp-test-models, echo=TRUE}
+for (phase in phase_list) {
+  for (species in species_list) {
+    
+    data <- readRDS(paste0(path_own_data, "/data_unscaled_", species, "_", gsub(" ", "_", phase), ".rds")) %>%
+      rename_fun() %>%
+      select(-LEAF_COLOURING_LAG) %>%
+      filter(complete.cases(.)) %>%
+      mutate(RELIEF = factor(RELIEF),
+             SOCIAL_SITUATION = factor(SOCIAL_SITUATION))
+    
+    models <- list(
+      temp_test_mai_int = tryCatch(
+        lme(fixed = doy ~ poly(GDD_mainstream, degree = 2), 
+            random = ~ 1 | METEO_ID, data = data, method = "ML", correlation = autoregression_simple),
+        error = function(e) NULL),
+      
+      temp_test_mai_slo = tryCatch(
+        lme(fixed = doy ~ poly(GDD_mainstream, degree = 2), 
+            random = ~ 1 + GDD_mainstream | METEO_ID, data = data, method = "ML", correlation = autoregression_simple),
+        error = function(e) NULL),
+      
+      temp_test_con_int = tryCatch(
+        lme(fixed = doy ~ poly(GDD_conservative, degree = 2), 
+            random = ~ 1 | METEO_ID, data = data, method = "ML", correlation = autoregression_simple),
+        error = function(e) NULL),
+      
+      temp_test_con_slo = tryCatch(
+        lme(fixed = doy ~ poly(GDD_conservative, degree = 2), 
+            random = ~ 1 + GDD_conservative | METEO_ID, data = data, method = "ML", correlation = autoregression_simple),
+        error = function(e) NULL)
+      )
+   
+      if (!is.null(models)) {
+        saveRDS(models, paste0(path_output_data, "/temp_test", "_", species, "_", gsub(" ", "_", phase), ".rds"))
+      } else {
+        message("Something for ", species, " ", phase, " failed.")
+      }
+    }
+  }
+```
+
+```{r generate-refined-reference-models, echo=TRUE}
+for (phase in phase_list) {
+  for (species in species_list) {
+    
+    data <- readRDS(paste0(path_own_data, "/data_unscaled_", species, "_", gsub(" ", "_", phase), ".rds")) %>%
+      rename_fun() %>%
+      select(-LEAF_COLOURING_LAG) %>%
+      filter(complete.cases(.)) %>%
+      mutate(RELIEF = factor(RELIEF),
+             SOCIAL_SITUATION = factor(SOCIAL_SITUATION))
+    
+    random_simple <- readRDS(paste0(path_output_data, "/random_simple.rds"))
+    autoregression_simple <- readRDS(paste0(path_output_data, "/autoregression_simple.rds"))
+    
+    # create refined reference models
+    models <- list(
+      ref_imp_mai_int_poly = tryCatch(
+        lme(fixed = doy ~ poly(GDD_mainstream, degree=2) * CDD_mainstream, 
+            random = ~ 1 | METEO_ID, data = data, method = "ML", correlation = autoregression_simple),
+        error = function(e) NULL),
+      
+      ref_imp_mai_int_line = tryCatch(
+        lme(fixed = doy ~ GDD_mainstream * CDD_mainstream, 
+            random = ~ 1 | METEO_ID, data = data, method = "ML", correlation = autoregression_simple),
+        error = function(e) NULL),
+      
+      ref_imp_con_int_poly = tryCatch(
+        lme(fixed = doy ~ poly(GDD_conservative, degree=2) * CDD_conservative, 
+            random = ~ 1 | METEO_ID, data = data, method = "ML", correlation = autoregression_simple),
+        error = function(e) NULL),
+      
+      ref_imp_con_int_line = tryCatch(
+        lme(fixed = doy ~ GDD_conservative * CDD_conservative, 
+            random = ~ 1 | METEO_ID, data = data, method = "ML", correlation = autoregression_simple),
+        error = function(e) NULL)
+    )
+   
+    for (model_name in names(models)) {
+      model <- models[[model_name]]
+      
+      if (!is.null(model)) {
+        selected_subset <- NULL
+
+        dredge_result <- dredge(model, 
+                                  # extra = list("RMSE" = function(x) sqrt(mean(residuals(x)^2))),
+                                  rank = list(cAIC = fun_get_caic),
+                                  fixed = c("poly(GDD_mainstream, degree = 2)", "GDD_mainstream", "poly(GDD_conservative, degree = 2)", "GDD_conservative")
+                                  )
+          
+          ref <- get.models(dredge_result, subset = TRUE, method = "ML") %>% setNames(paste0(model_name, "_", seq_along(.)))
+
+          
+          saveRDS(ref, paste0(path_output_data, "/",
+                              model_name, "_", species, "_", gsub(" ", "_", phase), ".rds"))
+        } else {
+        message("Model ", model_name, " for ", species, " ", phase, " failed.")
+      }
+    }
+  }
+}
+```
+
+## Global models
+
+Based on the hypothesis that the adjusted effects of temperature, drought, stand structure, soil characteristics and topography influence the timing of leaf unfolding two global models (mainstream and conservative) were developed. The method for calculating the temperature sums can impact the results considerably. Consequently the global model "**mainstream"** uses GDD and CDD sums according to the common approach to end accumulation at the mean doy per site, whereas the global model"**conservative"** uses GDD and CDD sums that were ended at the earliest 5% percentile of doys per site.
+
+#### Fixed mainstream effects
+
+```{r fixed-mainstream, echo=TRUE, filename="Loop to generate all mainstream fixed effects for all species."}
+for (phase in phase_list) {
+  for (species in species_list) {
+    if (phase == "leaf unfolding") {
+      if (species == "FS") { # global model for evergreens
+        fixed_effects <- as.formula(doy ~
+          poly(GDD_mainstream, degree=2) * CDD_mainstream +
+          poly(DROUGHT, degree=2) * poly(AWC, degree=2) +
+          poly(SLOPE_ASPECT_HL, degree=2) * poly(SLOPE_INCLINATION_DEG, degree=2) + RELIEF + TREE_ELEVATION +
+          SOCIAL_SITUATION + poly(TREE_HEIGHT, degree=2) * poly(STAND_HEIGHT, degree=2))
+      } else if (species == "LD") {
+        fixed_effects <- as.formula(doy ~
+          poly(GDD_mainstream, degree=2) * CDD_mainstream +
+          poly(DROUGHT, degree=2) * poly(AWC, degree=2) +
+          poly(SLOPE_ASPECT_HL, degree=2) * poly(SLOPE_INCLINATION_DEG, degree=2) + RELIEF + TREE_ELEVATION +
+          SOCIAL_SITUATION + poly(TREE_HEIGHT, degree=2) * poly(STAND_HEIGHT, degree=2))
+      } else if (species == "PA") {
+        fixed_effects <- as.formula(doy ~
+          poly(GDD_mainstream, degree=2) * CDD_mainstream +
+          poly(DROUGHT, degree=2) * poly(AWC, degree=2) +
+          poly(SLOPE_ASPECT_HL, degree=2) * poly(SLOPE_INCLINATION_DEG, degree=2) + RELIEF + TREE_ELEVATION +
+          SOCIAL_SITUATION + poly(TREE_HEIGHT, degree=2) * poly(STAND_HEIGHT, degree=2))
+      } else if (species == "TC"){
+        fixed_effects <- as.formula(doy ~
+          poly(GDD_mainstream, degree=2) * CDD_mainstream +
+          poly(DROUGHT, degree=2) * poly(AWC, degree=2) +
+          poly(SLOPE_ASPECT_HL, degree=2) * poly(SLOPE_INCLINATION_DEG, degree=2) + RELIEF + TREE_ELEVATION +
+          SOCIAL_SITUATION + poly(TREE_HEIGHT, degree=2) * poly(STAND_HEIGHT, degree=2))
+        }
+      }
+    
+    else { # global model for other phase
+      fixed_effects <- as.formula(doy ~ other)
+    }
+    
+    saveRDS(fixed_effects, paste0(path_output_data, "/fixed_mainstream_", species, "_", gsub(" ", "_", phase), ".rds"))
+  }
+}
+```
+
+#### Fixed conservative effects
+
+```{r fixed-clean, echo=TRUE, filename="Loop to generate all conservative fixed effects for all species."}
+for (phase in phase_list) {
+  for (species in species_list) {
+    if (phase == "leaf unfolding") {
+      if (species == "FS") { # global model for evergreens
+        fixed_effects <- as.formula(doy ~
+          poly(GDD_conservative, degree=2) * CDD_conservative +
+          poly(DROUGHT, degree=2) * poly(AWC, degree=2) +
+          poly(SLOPE_ASPECT_HL, degree=2) * poly(SLOPE_INCLINATION_DEG, degree=2) + RELIEF + TREE_ELEVATION +
+          SOCIAL_SITUATION + poly(TREE_HEIGHT, degree=2) * poly(STAND_HEIGHT, degree=2))
+      } else if (species == "LD") {
+        fixed_effects <- as.formula(doy ~
+          poly(GDD_conservative, degree=2) * CDD_conservative +
+          poly(DROUGHT, degree=2) * poly(AWC, degree=2) +
+          poly(SLOPE_ASPECT_HL, degree=2) * poly(SLOPE_INCLINATION_DEG, degree=2) + RELIEF + TREE_ELEVATION +
+          SOCIAL_SITUATION + poly(TREE_HEIGHT, degree=2) * poly(STAND_HEIGHT, degree=2))
+      } else if (species == "PA") {
+        fixed_effects <- as.formula(doy ~
+          poly(GDD_conservative, degree=2) +
+          poly(DROUGHT, degree=2) * poly(AWC, degree=2) +
+          poly(SLOPE_ASPECT_HL, degree=2) * poly(SLOPE_INCLINATION_DEG, degree=2) + RELIEF + TREE_ELEVATION +
+          SOCIAL_SITUATION + poly(TREE_HEIGHT, degree=2) * poly(STAND_HEIGHT, degree=2))
+      } else if (species == "TC"){
+        fixed_effects <- as.formula(doy ~
+          GDD_conservative * CDD_conservative +
+          poly(DROUGHT, degree=2) * poly(AWC, degree=2) +
+          poly(SLOPE_ASPECT_HL, degree=2) * poly(SLOPE_INCLINATION_DEG, degree=2) + RELIEF + TREE_ELEVATION +
+          SOCIAL_SITUATION + poly(TREE_HEIGHT, degree=2) * poly(STAND_HEIGHT, degree=2))
+        }
+      }
+    
+    else { # global model for other phase
+      fixed_effects <- as.formula(doy ~ other)
+    }
+    
+    saveRDS(fixed_effects, paste0(path_output_data, "/fixed_conservative_", species, "_", gsub(" ", "_", phase), ".rds"))
+  }
+}
+```
+
+#### Global model combinations
+
+```{r species-specific-global-models, echo=TRUE, filename="Loop to generate all global models for all species."}
+for (phase in phase_list) {
+  for (species in species_list) {
+    
+    # load data
+    data <- readRDS(paste0(path_own_data, "/data_unscaled_", species, "_", gsub(" ", "_", phase), ".rds")) %>%
+      rename_fun() %>%
+      select(-LEAF_COLOURING_LAG) %>%
+      filter(complete.cases(.)) %>%
+      mutate(RELIEF = factor(RELIEF),
+             SOCIAL_SITUATION = factor(SOCIAL_SITUATION))
+    
+    # load fixed effects
+    fixed_conservative <- readRDS(paste0(path_output_data, "/fixed_conservative_", species, "_", gsub(" ", "_", phase), ".rds"))
+    fixed_mainstream <- readRDS(paste0(path_output_data, "/fixed_mainstream_", species, "_", gsub(" ", "_", phase), ".rds"))
+    
+    # load random effects  
+    random_simple <- readRDS(paste0(path_output_data, "/random_simple.rds"))
+    
+    # load autoregression parameter
+    autoregression_simple <- readRDS(paste0(path_output_data, "/autoregression_simple.rds"))
+
+    # mainstream
+      # random simple
+      tryCatch({
+      global_maisim  <- eval(bquote(lme(fixed = fixed_mainstream, random = random_simple, data = data, method = "ML", correlation = autoregression_simple)))
+      saveRDS(global_maisim, paste0(path_output_data, "/global_mai_", species, "_", gsub(" ", "_", phase), ".rds"))
+      }, error = function(e) message("Error in model with global_maisim for ", species, " ", phase, ": ", e$message))
+
+    # conservative
+      # random simple
+      tryCatch({
+      global_consim <- eval(bquote(lme(fixed = fixed_conservative, random = random_simple, data = data, method = "ML", correlation = autoregression_simple)))
+      saveRDS(global_consim, paste0(path_output_data, "/global_con_", species, "_", gsub(" ", "_", phase), ".rds"))
+      }, error = function(e) message("Error in model with global_consim for ", species, " ", phase, ": ", e$message))
+  }
+}
+```
+
+
+### Generation of global model variations
+
+The variations of all global models were created with mumln::dredge. The function was fitted with each global model and set to test all combinations that contained a growing degree day term and ≤ 10 terms in total.
+
+```{r dredge-code, echo=TRUE, filename="Execution of mumln:dredge via an array for all global models."}
+#| eval: FALSE 
+#| file: 4_euler_dredge_all.R
+```
+
+Parameter weights were calculated for all models with delta cAIC \< 4 and \< 2 [@burnham2002] for further consideration and the three models with the lowest cAIC (**best models**) and the models with the least number of parameters (**parsimonious models**) were extracted for further analysis.
+
+### Limitations
+
+We wanted to adjust the social situation with an interaction with edge distance. However, this led to issues with the covariance matrix. Edge-distance was removed, because it has little validity as a main effect. Furthermore, it would have been useful to test the global model with a warming term in interaction with all other terms. However, this is computationally expensive. Therefore, only the most important interactions were kept.
+Due to a substantial amount of missing values for leaf colouring containing it was removed from the global models.
+
+## Final models
+
+The final models were generated from the best and most parsimonious model variations of the global model. They demonstrate what the effects of important parameters could look like and how good they would be with prediction. If the quadratic term was significant, non-significant linear terms were kept. If only the linear term was significant, the quadratic term was discarded. Interactions were only kept where significant.
+
+```{r create-species-results-qmd}
+for (species in species_list) {
+  for (phase in phase_list) {
+  # Read the template content
+  qmd_content <- readLines(paste0(location, "/5_species_template.qmd"))
+  
+  header <- case_when(species == "FS" ~ "Fagus sylvatica",
+                      species == "LD" ~ "Larix decidua",
+                      species == "PA" ~ "Picea abies",
+                      species == "TC" ~ "Tilia cordata")
+  
+  # paste species and phase to the template lines
+  qmd_content[10] <- paste0("phase <- \"", phase, "\"")
+  qmd_content[11] <- paste0("species <- \"", species, "\"")
+  qmd_content[14] <- paste0("# ", header)
+  
+  # Define the path for the new .qmd file
+  species_qmd_path <- file.path(location, paste0("/5_results_", species, "_", gsub(" ", "_", phase) , ".qmd"))
+  
+  # Write the modified content to the new .qmd file
+  writeLines(qmd_content, species_qmd_path)
+  }
+}
+```
+
+## Model diagnostics
+
+Compliance with model assumptions was assessed with a residual analysis for each set of species specific models. Multicollinearity was assessed with the corvif function by @zuur2009. Cooks distance and leverage was assessed with HLMdiag::cooks.distance and HLMdiag::leverage because more common packages and functions were incompatible with nlme::lme-objects. Some models with temperature parametrized to the mean site leaf unfolding date (mainstream) had issues with residual distributions. Therefore only models with temperature parametrized to the $Q_{0.05}$ site leaf unfolding date (conservative) were considered for the model selection.
+
+
+## Model selection
+
+Models that met all diagnostic criteria were selected and compared using the cAIC and RMSE.

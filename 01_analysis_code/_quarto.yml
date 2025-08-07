@@ -1,0 +1,50 @@
+project:
+  type: book
+
+book:
+  title: "Co-Drivers beyond temperature shape the timing of leaf unfolding in temperate trees"
+  author: NCOMMS-25-57713-T
+  date: today
+  chapters:
+  - part: "Preface"
+    chapters:  
+      - index.qmd
+  - part: "Methods"
+    chapters:
+      - 4_intro_global_models.qmd
+  - part: "Results"
+    chapters:
+      - 5_results_FS_leaf_unfolding.qmd
+      - 5_results_LD_leaf_unfolding.qmd
+      - 5_results_PA_leaf_unfolding.qmd
+      - 5_results_TC_leaf_unfolding.qmd
+      - 6_species_comparison_leaf_unfolding.qmd
+
+format:
+  html:
+    page-layout: full
+    code-fold: true
+    code-line-numbers: true
+    code-summary: "Show the code"
+    code-overflow: wrap
+    theme: minty
+    highlight-style: espresso
+    code-folding: hide
+    fig-width: 8
+    fig-height: 4
+    grid: 
+      body-width: 1100px
+    toc: true
+    toc-depth: 3
+    toc-location: right
+    toc-float:
+     collapsed: false
+     number-sections: true
+
+editor: visual
+
+execute:
+    echo: false
+    warning: false
+    message: false
+    freeze: true

@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.549">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Co-Drivers beyond temperature shape the timing of leaf unfolding in temperate trees - 3&nbsp; Larix decidua</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./5_results_PA_leaf_unfolding.html" rel="next">
+<link href="./5_results_FS_leaf_unfolding.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<link href="site_libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+<script src="site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<link href="site_libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet">
+<script src="site_libs/datatables-binding-0.33/datatables.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<link href="site_libs/dt-core-1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
+<link href="site_libs/dt-core-1.13.6/css/jquery.dataTables.extra.css" rel="stylesheet">
+<script src="site_libs/dt-core-1.13.6/js/jquery.dataTables.min.js"></script>
+<link href="site_libs/nouislider-7.0.10/jquery.nouislider.min.css" rel="stylesheet">
+<script src="site_libs/nouislider-7.0.10/jquery.nouislider.min.js"></script>
+<link href="site_libs/selectize-0.12.0/selectize.bootstrap3.css" rel="stylesheet">
+<script src="site_libs/selectize-0.12.0/selectize.min.js"></script>
+<link href="site_libs/crosstalk-1.2.1/css/crosstalk.min.css" rel="stylesheet">
+<script src="site_libs/crosstalk-1.2.1/js/crosstalk.min.js"></script>
+
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./5_results_FS_leaf_unfolding.html">Results</a></li><li class="breadcrumb-item"><a href="./5_results_LD_leaf_unfolding.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Larix decidua</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Co-Drivers beyond temperature shape the timing of leaf unfolding in temperate trees</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">Preface</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Readme</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">Methods</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./4_intro_global_models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Models</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+ <span class="menu-text">Results</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./5_results_FS_leaf_unfolding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Fagus sylvatica</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./5_results_LD_leaf_unfolding.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Larix decidua</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./5_results_PA_leaf_unfolding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Picea abies</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./5_results_TC_leaf_unfolding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Tilia cordata</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./6_species_comparison_leaf_unfolding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Species comparison</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#effect-shape-of-temperature" id="toc-effect-shape-of-temperature" class="nav-link active" data-scroll-target="#effect-shape-of-temperature"><span class="header-section-number">3.1</span> Effect shape of temperature</a></li>
+  <li><a href="#effect-shape-of-temperature-with-chilling" id="toc-effect-shape-of-temperature-with-chilling" class="nav-link" data-scroll-target="#effect-shape-of-temperature-with-chilling"><span class="header-section-number">3.2</span> Effect shape of temperature with chilling</a></li>
+  <li><a href="#global-model-variations" id="toc-global-model-variations" class="nav-link" data-scroll-target="#global-model-variations"><span class="header-section-number">3.3</span> Global model variations</a></li>
+  <li><a href="#model-processing" id="toc-model-processing" class="nav-link" data-scroll-target="#model-processing"><span class="header-section-number">3.4</span> Model processing</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./5_results_FS_leaf_unfolding.html">Results</a></li><li class="breadcrumb-item"><a href="./5_results_LD_leaf_unfolding.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Larix decidua</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Larix decidua</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="effect-shape-of-temperature" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="effect-shape-of-temperature"><span class="header-section-number">3.1</span> Effect shape of temperature</h2>
+<div class="cell">
+<div id="tbl-temp-test-selection" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-temp-test-selection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3.1: Comparison of model performance of linear and polynomial temperature parameters with cAIC and RMSE.
+</figcaption>
+<div aria-describedby="tbl-temp-test-selection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-8c7963fe41a0993efa8c" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-8c7963fe41a0993efa8c">{"x":{"filter":"top","vertical":false,"filterHTML":"<tr>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\" disabled=\"\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"7001.647\" data-max=\"7049.034\" data-scale=\"3\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"10.445\" data-max=\"11.294\" data-scale=\"3\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"1.481\" data-max=\"48.868\" data-scale=\"3\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0.211\" data-max=\"1.061\" data-scale=\"3\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","data":[["temp_test_con_int","ref_true_con_int"],["conservative","conservative"],[7001.647,7049.034],[10.445,11.294],["doy ~ poly(GDD_conservative, degree = 2)","doy ~ GDD_conservative"],[1.481,48.868],[0.211,1.061]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>model_name<\/th>\n      <th>family<\/th>\n      <th>cAIC<\/th>\n      <th>RMSE<\/th>\n      <th>fixed_effects<\/th>\n      <th>d.cAIC<\/th>\n      <th>d.RMSE<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"pageLength":10,"extenstions":"Buttons","dom":"Bfrtip","buttons":["print"],"columnDefs":[{"className":"dt-right","targets":[2,3,5,6]},{"name":"model_name","targets":0},{"name":"family","targets":1},{"name":"cAIC","targets":2},{"name":"RMSE","targets":3},{"name":"fixed_effects","targets":4},{"name":"d.cAIC","targets":5},{"name":"d.RMSE","targets":6}],"order":[],"autoWidth":false,"orderClasses":false,"orderCellsTop":true}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell">
+<div id="tbl-temp-test-coefficients" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-temp-test-coefficients-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3.2: Comparison of parameters across models with estimate, standard error, t-value and p-value
+</figcaption>
+<div aria-describedby="tbl-temp-test-coefficients-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-20a006c1186cce47e7e7" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-20a006c1186cce47e7e7">{"x":{"filter":"top","vertical":false,"filterHTML":"<tr>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\" disabled=\"\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\" disabled=\"\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\" disabled=\"\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0\" data-max=\"1\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"-219.6198\" data-max=\"81.3921\" data-scale=\"4\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"10.289\" data-max=\"11.7635\" data-scale=\"4\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","data":[["temp_test_con_int","temp_test_con_int"],["GDD linear","GDD quadratic"],["conservative","conservative"],[0,0],[-219.6198,81.3921],[11.7635,10.289],["poly(GDD_conservative, degree = 2)1","poly(GDD_conservative, degree = 2)2"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>model_name<\/th>\n      <th>label<\/th>\n      <th>family<\/th>\n      <th>p.value<\/th>\n      <th>estimate<\/th>\n      <th>std.error<\/th>\n      <th>term<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"pageLength":10,"dom":"Bfrtip","columnDefs":[{"className":"dt-right","targets":[3,4,5]},{"name":"model_name","targets":0},{"name":"label","targets":1},{"name":"family","targets":2},{"name":"p.value","targets":3},{"name":"estimate","targets":4},{"name":"std.error","targets":5},{"name":"term","targets":6}],"order":[],"autoWidth":false,"orderClasses":false,"orderCellsTop":true}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+<section id="effect-shape-of-temperature-with-chilling" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="effect-shape-of-temperature-with-chilling"><span class="header-section-number">3.2</span> Effect shape of temperature with chilling</h2>
+<div class="cell">
+<div id="tbl-shape-performance" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-shape-performance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3.3: Comparison of model performance of linear and non-linear growing degree days in combination with chilling degree days.
+</figcaption>
+<div aria-describedby="tbl-shape-performance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-aca7759bc60ce7a172b0" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-aca7759bc60ce7a172b0">{"x":{"filter":"top","vertical":false,"filterHTML":"<tr>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\" disabled=\"\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"7000.166\" data-max=\"7049.257\" data-scale=\"3\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"10.233\" data-max=\"11.294\" data-scale=\"3\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0\" data-max=\"49.091\" data-scale=\"3\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0\" data-max=\"1.061\" data-scale=\"3\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","data":[["ref_imp_con_int_poly_1","ref_imp_con_int_poly_2","ref_imp_con_int_poly_3","ref_imp_con_int_line_1","ref_imp_con_int_line_2","ref_imp_con_int_line_3"],["conservative","conservative","conservative","conservative","conservative","conservative"],[7000.166,7001.647,7004.504,7008.188,7049.034,7049.257],[10.24,10.445,10.233,10.664,11.294,10.863],["doy ~ CDD_conservative + CDD_conservative:poly(GDD_conservative,      degree = 2) + 1 + poly(GDD_conservative, degree = 2)","doy ~ 1 + poly(GDD_conservative, degree = 2)","doy ~ CDD_conservative + 1 + poly(GDD_conservative, degree = 2)","doy ~ CDD_conservative + CDD_conservative:GDD_conservative +      1 + GDD_conservative","doy ~ 1 + GDD_conservative","doy ~ CDD_conservative + 1 + GDD_conservative"],[0,1.481,4.338,8.022,48.868,49.091],[0.007,0.211,0,0.43,1.061,0.63]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>model_name<\/th>\n      <th>family<\/th>\n      <th>cAIC<\/th>\n      <th>RMSE<\/th>\n      <th>fixed_effects<\/th>\n      <th>d.cAIC<\/th>\n      <th>d.RMSE<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"pageLength":10,"extenstions":"Buttons","dom":"Bfrtip","buttons":["print"],"columnDefs":[{"className":"dt-right","targets":[2,3,5,6]},{"name":"model_name","targets":0},{"name":"family","targets":1},{"name":"cAIC","targets":2},{"name":"RMSE","targets":3},{"name":"fixed_effects","targets":4},{"name":"d.cAIC","targets":5},{"name":"d.RMSE","targets":6}],"order":[],"autoWidth":false,"orderClasses":false,"orderCellsTop":true}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell">
+<div id="tbl-shape-coefficients" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-shape-coefficients-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3.4: Comparison of siginificance of various growing and chilling degree day combinations.
+</figcaption>
+<div aria-describedby="tbl-shape-coefficients-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-c9dddb4682cb473177f6" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-c9dddb4682cb473177f6">{"x":{"filter":"top","vertical":false,"filterHTML":"<tr>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\" disabled=\"\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0\" data-max=\"0.3345\" data-scale=\"4\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"-219.6198\" data-max=\"81.3921\" data-scale=\"4\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0\" data-max=\"28.6632\" data-scale=\"4\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","data":[["ref_imp_con_int_line_1","ref_imp_con_int_line_1","ref_imp_con_int_line_1","ref_imp_con_int_line_2","ref_imp_con_int_line_3","ref_imp_con_int_line_3","ref_imp_con_int_poly_1","ref_imp_con_int_poly_1","ref_imp_con_int_poly_1","ref_imp_con_int_poly_1","ref_imp_con_int_poly_1","ref_imp_con_int_poly_2","ref_imp_con_int_poly_2","ref_imp_con_int_poly_3","ref_imp_con_int_poly_3","ref_imp_con_int_poly_3"],["CDD","GDD","CDD:GDD","GDD","CDD","GDD","CDD","GDD linear","GDD quadratic","CDD:GDD linear","CDD:GDD quadratic","GDD linear","GDD quadratic","CDD","GDD linear","GDD quadratic"],["conservative","conservative","conservative","conservative","conservative","conservative","conservative","conservative","conservative","conservative","conservative","conservative","conservative","conservative","conservative","conservative"],[0,0,0,0,0.0063,0,0.2198,0,0.0114,0.1826,0.3345,0,0,0.1272,0,0],[0.0224,-0.043,-0.0001,-0.1069,0.008,-0.0959,0.0036,-163.8094,46.7999,-0.1113,0.0576,-219.6198,81.3921,0.0044,-206.2803,78.9376],[0.0036,0.0102,0,0.0049,0.0029,0.0063,0.0029,28.6632,18.4623,0.0834,0.0596,11.7635,10.289,0.0029,14.4237,10.4678],["CDD_conservative","GDD_conservative","CDD_conservative:GDD_conservative","GDD_conservative","CDD_conservative","GDD_conservative","CDD_conservative","poly(GDD_conservative, degree = 2)1","poly(GDD_conservative, degree = 2)2","CDD_conservative:poly(GDD_conservative, degree = 2)1","CDD_conservative:poly(GDD_conservative, degree = 2)2","poly(GDD_conservative, degree = 2)1","poly(GDD_conservative, degree = 2)2","CDD_conservative","poly(GDD_conservative, degree = 2)1","poly(GDD_conservative, degree = 2)2"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>model_name<\/th>\n      <th>label<\/th>\n      <th>family<\/th>\n      <th>p.value<\/th>\n      <th>estimate<\/th>\n      <th>std.error<\/th>\n      <th>term<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"pageLength":10,"dom":"Bfrtip","columnDefs":[{"className":"dt-right","targets":[3,4,5]},{"name":"model_name","targets":0},{"name":"label","targets":1},{"name":"family","targets":2},{"name":"p.value","targets":3},{"name":"estimate","targets":4},{"name":"std.error","targets":5},{"name":"term","targets":6}],"order":[],"autoWidth":false,"orderClasses":false,"orderCellsTop":true}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+<section id="global-model-variations" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="global-model-variations"><span class="header-section-number">3.3</span> Global model variations</h2>
+<div class="cell">
+<div id="tbl-variations" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-variations-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3.5: Number of equally or almost equally informative conservative model variations and maximum model weights (Δ cAIC &lt; 4 and &lt; 2).
+</figcaption>
+<div aria-describedby="tbl-variations-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-4b6617936c102a7dbeff" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-4b6617936c102a7dbeff">{"x":{"filter":"none","vertical":false,"data":[[1209],[381],[0.00227],[0.0041]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>number of models (Δ &lt; 4)<\/th>\n      <th>number of models (Δ &lt; 2)<\/th>\n      <th>maximum weight (Δ &lt; 4)<\/th>\n      <th>maximum weight (Δ &lt; 2)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"pageLength":5,"columnDefs":[{"className":"dt-right","targets":[0,1,2,3]},{"name":"d4","targets":0},{"name":"d2","targets":1},{"name":"max_weight4","targets":2},{"name":"max_weight2","targets":3}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell">
+<div id="tbl-best-models" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-best-models-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3.6: The three best model variations derived from the global model.
+</figcaption>
+<div aria-describedby="tbl-best-models-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-0d3e6662201d8475536c" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-0d3e6662201d8475536c">{"x":{"filter":"top","vertical":false,"filterHTML":"<tr>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","data":[["best_con_1","best_con_2","best_con_3"],["doy ~ CDD_conservative + poly(AWC, degree = 2) + poly(STAND_HEIGHT,      degree = 2) + RELIEF + SOCIAL_SITUATION + CDD_conservative:poly(GDD_conservative,      degree = 2) + 1 + poly(GDD_conservative, degree = 2)","doy ~ CDD_conservative + poly(AWC, degree = 2) + poly(SLOPE_INCLINATION_DEG,      degree = 2) + poly(STAND_HEIGHT, degree = 2) + RELIEF + SOCIAL_SITUATION +      CDD_conservative:poly(GDD_conservative, degree = 2) + 1 +      poly(GDD_conservative, degree = 2)","doy ~ CDD_conservative + poly(AWC, degree = 2) + poly(STAND_HEIGHT,      degree = 2) + poly(TREE_HEIGHT, degree = 2) + RELIEF + SOCIAL_SITUATION +      CDD_conservative:poly(GDD_conservative, degree = 2) + 1 +      poly(GDD_conservative, degree = 2)"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>model_name<\/th>\n      <th>fixed_effects<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"pageLength":5,"dom":"Bfrtip","columnDefs":[{"name":"model_name","targets":0},{"name":"fixed_effects","targets":1}],"order":[],"autoWidth":false,"orderClasses":false,"orderCellsTop":true,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell">
+<div id="tbl-parsimonious-con" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-parsimonious-con-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3.7: The three most parsimonious models derived from the global model.
+</figcaption>
+<div aria-describedby="tbl-parsimonious-con-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-66baa1d9e259b78709ac" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-66baa1d9e259b78709ac">{"x":{"filter":"top","vertical":false,"filterHTML":"<tr>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","data":[["parsimonious_con_d4a","parsimonious_con_d4b","parsimonious_con_d4c","parsimonious_con_d2a","parsimonious_con_d2b","parsimonious_con_d2c"],["doy ~ 1 + poly(GDD_conservative, degree = 2)","doy ~ TREE_ELEVATION + 1 + poly(GDD_conservative, degree = 2)","doy ~ poly(AWC, degree = 2) + 1 + poly(GDD_conservative, degree = 2)","doy ~ 1 + poly(GDD_conservative, degree = 2)","doy ~ CDD_conservative + CDD_conservative:poly(GDD_conservative,      degree = 2) + 1 + poly(GDD_conservative, degree = 2)","doy ~ RELIEF + 1 + poly(GDD_conservative, degree = 2)"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>model_name<\/th>\n      <th>fixed_effects<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"pageLength":5,"dom":"Bfrtip","columnDefs":[{"name":"model_name","targets":0},{"name":"fixed_effects","targets":1}],"order":[],"autoWidth":false,"orderClasses":false,"orderCellsTop":true,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+<section id="model-processing" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="model-processing"><span class="header-section-number">3.4</span> Model processing</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="co"># nest data set</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a>manual_models_input <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<span id="cb1-3"><a href="#cb1-3"></a>  <span class="fu">nest</span>()</span>
+<span id="cb1-4"><a href="#cb1-4"></a></span>
+<span id="cb1-5"><a href="#cb1-5"></a><span class="co"># save to file for evaluation of manual models in the template</span></span>
+<span id="cb1-6"><a href="#cb1-6"></a><span class="fu">saveRDS</span>(manual_models_input, <span class="fu">paste0</span>(path_output_data, <span class="st">"/manual_models_"</span>, species, <span class="st">"_"</span>, <span class="fu">gsub</span> (<span class="st">" "</span>, <span class="st">"_"</span>, phase), <span class="st">".rds"</span>))</span>
+<span id="cb1-7"><a href="#cb1-7"></a></span>
+<span id="cb1-8"><a href="#cb1-8"></a><span class="co"># source manual models to be evaluated within template</span></span>
+<span id="cb1-9"><a href="#cb1-9"></a><span class="fu">source</span>(<span class="fu">paste0</span>(location, <span class="st">"/5_manual_"</span>, species, <span class="st">"_"</span>, <span class="fu">gsub</span> (<span class="st">" "</span>, <span class="st">"_"</span>, phase), <span class="st">".R"</span>), <span class="at">echo=</span><span class="cn">TRUE</span>, <span class="at">max.deparse.length =</span> <span class="dv">5000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+&gt; manual_models &lt;- manual_models_input %&gt;% mutate(final_con_int = map(data, 
++     safely(~lme(fixed = doy ~ GDD_conservative * CDD_conservative, 
++         random = ~1 | METEO_ID, data = ., method = "ML", correlation = autoregression_simple, 
++         na.action = na.omit))), ref_imp_con_int = map(data, safely(~lme(fixed = doy ~ 
++     poly(GDD_conservative, degree = 2) + CDD_conservative, random = ~1 | 
++     METEO_ID, data = ., method = "ML", correlation = autoregression_simple, 
++     na.action = na.omit))), final_con_slo = map(data, safely(~lme(fixed = doy ~ 
++     poly(GDD_conservative, degree = 2) * CDD_conservative, random = ~1 + 
++     GDD_conservative | METEO_ID, data = ., method = "ML", correlation = autoregression_simple, 
++     na.action = na.omit))), ref_imp_con_slo = map(data, safely(~lme(fixed = doy ~ 
++     poly(GDD_conservative, degree = 2) * CDD_conservative, random = ~1 + 
++     GDD_conservative | METEO_ID, data = ., method = "ML", correlation = autoregression_simple, 
++     na.action = na.omit))))</code></pre>
+</div>
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="co"># format manual models to fit the data frame structure</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a>manual_models <span class="ot">&lt;-</span> manual_models <span class="sc">%&gt;%</span></span>
+<span id="cb3-3"><a href="#cb3-3"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="dv">2</span><span class="sc">:</span><span class="fu">ncol</span>(.), <span class="at">names_to =</span> <span class="st">"model_name"</span>, <span class="at">values_to =</span> <span class="st">"model"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-4"><a href="#cb3-4"></a>  <span class="fu">filter</span>(<span class="fu">map_lgl</span>(model, <span class="sc">~</span> <span class="sc">!</span><span class="fu">is.null</span>(.x<span class="sc">$</span>result))) <span class="sc">%&gt;%</span></span>
+<span id="cb3-5"><a href="#cb3-5"></a>  <span class="fu">mutate</span>(<span class="at">model =</span> <span class="fu">map</span>(model, <span class="st">"result"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># function to extract coefficients with confidence intervals</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a>safe_tidy <span class="ot">&lt;-</span> <span class="fu">possibly</span>(</span>
+<span id="cb4-3"><a href="#cb4-3"></a>  <span class="sc">~</span> broom.mixed<span class="sc">::</span><span class="fu">tidy</span>(.x, <span class="at">conf.int =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">model_name =</span> .y), </span>
+<span id="cb4-4"><a href="#cb4-4"></a>  <span class="at">otherwise =</span> <span class="cn">NULL</span></span>
+<span id="cb4-5"><a href="#cb4-5"></a>)</span>
+<span id="cb4-6"><a href="#cb4-6"></a></span>
+<span id="cb4-7"><a href="#cb4-7"></a>models <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(manual_models, ref_imp_models, ref_true_models, temp_test_models, global_models, best_models, parsimonious_models</span>
+<span id="cb4-8"><a href="#cb4-8"></a>                    ) <span class="sc">%&gt;%</span></span>
+<span id="cb4-9"><a href="#cb4-9"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">str_detect</span>(model_name, exclude_type)) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-10"><a href="#cb4-10"></a>  <span class="fu">mutate</span>(<span class="at">tidy =</span> <span class="fu">map2</span>(model, model_name, safe_tidy), <span class="co"># extract coefficients and p-values</span></span>
+<span id="cb4-11"><a href="#cb4-11"></a>         <span class="at">augment =</span> <span class="fu">map2</span>(model, model_name, <span class="sc">~</span>{ <span class="co"># extract fitted values, residuals, fixed effects without data that is not contained in the respective model</span></span>
+<span id="cb4-12"><a href="#cb4-12"></a>           terms <span class="ot">&lt;-</span> <span class="fu">all.vars</span>(<span class="fu">formula</span>(.x))[<span class="sc">-</span><span class="dv">1</span>]  <span class="co"># Extract terms and remove response variable</span></span>
+<span id="cb4-13"><a href="#cb4-13"></a>           broom.mixed<span class="sc">::</span><span class="fu">augment</span>(.x) <span class="sc">%&gt;%</span></span>
+<span id="cb4-14"><a href="#cb4-14"></a>           <span class="fu">select</span>(<span class="fu">all_of</span>(terms), METEO_ID, year, SPECIES_SHORT, .fitted, .resid, .fixed) <span class="sc">%&gt;%</span></span>
+<span id="cb4-15"><a href="#cb4-15"></a>           <span class="fu">mutate</span>(<span class="at">model_name =</span> .y)</span>
+<span id="cb4-16"><a href="#cb4-16"></a>           }),</span>
+<span id="cb4-17"><a href="#cb4-17"></a>         <span class="at">terms =</span> <span class="fu">map</span>(model, <span class="sc">~</span><span class="fu">all.vars</span>(<span class="fu">formula</span>(.x))[<span class="sc">-</span><span class="dv">1</span>]),</span>
+<span id="cb4-18"><a href="#cb4-18"></a>         <span class="at">std_random =</span> <span class="fu">map</span>(model, <span class="sc">~</span><span class="fu">safely</span>(<span class="sc">~</span> {</span>
+<span id="cb4-19"><a href="#cb4-19"></a>           <span class="fu">intervals</span>(.x)<span class="sc">$</span>reStruct <span class="sc">%&gt;%</span></span>
+<span id="cb4-20"><a href="#cb4-20"></a>             <span class="fu">unlist</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb4-21"><a href="#cb4-21"></a>             <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb4-22"><a href="#cb4-22"></a>             <span class="fu">rename</span>(<span class="at">VALUE =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-23"><a href="#cb4-23"></a>             <span class="fu">rownames_to_column</span>(<span class="st">"PARAMETER"</span>)})(.x)<span class="sc">$</span>result), <span class="co"># calculate and extract standard deviation of random effects</span></span>
+<span id="cb4-24"><a href="#cb4-24"></a>         <span class="at">res_random =</span> (<span class="at">res_random =</span> <span class="fu">map</span>(model, <span class="sc">~</span>.x<span class="sc">$</span>sigma)),</span>
+<span id="cb4-25"><a href="#cb4-25"></a>         <span class="at">RMSE =</span> <span class="fu">map</span>(model, <span class="sc">~</span><span class="fu">sqrt</span>(<span class="fu">mean</span>(.x<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>))), <span class="co"># extract RMSE across populations</span></span>
+<span id="cb4-26"><a href="#cb4-26"></a>         <span class="at">cAIC =</span> <span class="fu">map</span>(model, <span class="sc">~</span><span class="fu">fun_get_caic</span>(.x)), <span class="co"># extract cAIC</span></span>
+<span id="cb4-27"><a href="#cb4-27"></a>         <span class="at">logLik =</span> <span class="fu">map</span>(model, <span class="sc">~</span><span class="fu">fun_get_log</span>(.x)) <span class="co"># extract logLik</span></span>
+<span id="cb4-28"><a href="#cb4-28"></a>         ) <span class="sc">%&gt;%</span></span>
+<span id="cb4-29"><a href="#cb4-29"></a>  <span class="fu">unnest</span>(cAIC, logLik, RMSE) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-30"><a href="#cb4-30"></a>    <span class="fu">mutate</span>(<span class="at">coef =</span> <span class="fu">map</span>(model, <span class="sc">~</span><span class="fu">coef</span>(.x)),</span>
+<span id="cb4-31"><a href="#cb4-31"></a>           <span class="at">terms_count =</span> <span class="fu">map</span>(model, <span class="sc">~</span><span class="fu">length</span>(<span class="fu">fixef</span>(.x))<span class="sc">+</span><span class="dv">1</span>), <span class="co"># extract number of parameters and add 1 for the grouping variable (for more details see Pinheiro and Bates 2000, p. 8)</span></span>
+<span id="cb4-32"><a href="#cb4-32"></a>           <span class="at">RMSE =</span> <span class="fu">as.numeric</span>(RMSE),</span>
+<span id="cb4-33"><a href="#cb4-33"></a>           <span class="at">delta_total_cAIC =</span> cAIC <span class="sc">-</span> <span class="fu">min</span>(cAIC))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co"># extract RMSE</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a>selection_parameters <span class="ot">&lt;-</span> models <span class="sc">%&gt;%</span> </span>
+<span id="cb5-3"><a href="#cb5-3"></a>  <span class="fu">select</span>(<span class="sc">-</span>tidy, <span class="sc">-</span>augment, <span class="sc">-</span>data, <span class="sc">-</span>terms) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-4"><a href="#cb5-4"></a>  <span class="fu">mutate</span>(<span class="at">calls =</span> <span class="fu">map</span>(model, <span class="sc">~</span><span class="fu">deparse</span>(.x[[<span class="st">"call"</span>]]) <span class="sc">%&gt;%</span> <span class="fu">paste</span>(<span class="at">collapse =</span> <span class="st">" "</span>)) <span class="sc">%&gt;%</span> <span class="fu">as.character</span>(), <span class="co"># extract calls</span></span>
+<span id="cb5-5"><a href="#cb5-5"></a>         <span class="at">fixed_effects =</span> <span class="fu">map</span>(model, <span class="sc">~</span><span class="fu">deparse</span>(.x[[<span class="st">"terms"</span>]]) <span class="sc">%&gt;%</span> <span class="fu">paste</span>(<span class="at">collapse =</span> <span class="st">" "</span>)) <span class="sc">%&gt;%</span> <span class="fu">as.character</span>(), <span class="co"># extract fixed effects</span></span>
+<span id="cb5-6"><a href="#cb5-6"></a>         <span class="at">random_effects =</span> <span class="fu">map</span>(model, <span class="sc">~</span>.x[[<span class="st">"call"</span>]][[<span class="st">"random"</span>]]) <span class="sc">%&gt;%</span> <span class="fu">as.character</span>()) <span class="sc">%&gt;%</span> <span class="co"># extract random effects</span></span>
+<span id="cb5-7"><a href="#cb5-7"></a>  <span class="fu">select</span>(model_name, RMSE, cAIC, logLik, terms_count, calls, fixed_effects, random_effects) <span class="sc">%&gt;%</span></span>
+<span id="cb5-8"><a href="#cb5-8"></a>  <span class="fu">unnest</span>(RMSE, cAIC, logLik, terms_count) <span class="sc">%&gt;%</span></span>
+<span id="cb5-9"><a href="#cb5-9"></a>  <span class="co"># add family and type</span></span>
+<span id="cb5-10"><a href="#cb5-10"></a>  <span class="fu">mutate</span>(<span class="at">type =</span> <span class="fu">case_when</span>(<span class="fu">str_detect</span>(model_name, <span class="st">"temp_test"</span>) <span class="sc">~</span> <span class="st">"effect shape"</span>,</span>
+<span id="cb5-11"><a href="#cb5-11"></a>                          <span class="fu">str_detect</span>(model_name, <span class="st">"ref_true"</span>) <span class="sc">~</span> <span class="st">"traditional reference"</span>,</span>
+<span id="cb5-12"><a href="#cb5-12"></a>                          <span class="fu">str_detect</span>(model_name, <span class="st">"ref_imp"</span>) <span class="sc">~</span> <span class="st">"refined reference"</span>,</span>
+<span id="cb5-13"><a href="#cb5-13"></a>                          <span class="fu">str_detect</span>(model_name, <span class="st">"final"</span>) <span class="sc">~</span> <span class="st">"final model"</span>,</span>
+<span id="cb5-14"><a href="#cb5-14"></a>                          <span class="fu">str_detect</span>(model_name, <span class="st">"best"</span>) <span class="sc">~</span> <span class="st">"best model"</span>,</span>
+<span id="cb5-15"><a href="#cb5-15"></a>                          <span class="fu">str_detect</span>(model_name, <span class="st">"global"</span>) <span class="sc">~</span> <span class="st">"global model"</span>,</span>
+<span id="cb5-16"><a href="#cb5-16"></a>                          <span class="fu">str_detect</span>(model_name, <span class="st">"pars"</span>) <span class="sc">~</span> <span class="st">"parsimonious model"</span>,</span>
+<span id="cb5-17"><a href="#cb5-17"></a>                          <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"other"</span>),</span>
+<span id="cb5-18"><a href="#cb5-18"></a>         <span class="at">family =</span> <span class="fu">case_when</span>(<span class="fu">str_detect</span>(model_name, <span class="st">"con"</span>) <span class="sc">~</span> <span class="st">"conservative"</span>,</span>
+<span id="cb5-19"><a href="#cb5-19"></a>                            <span class="fu">str_detect</span>(model_name, <span class="st">"mai"</span>) <span class="sc">~</span> <span class="st">"mainstream"</span>,</span>
+<span id="cb5-20"><a href="#cb5-20"></a>                            <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"other"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb5-21"><a href="#cb5-21"></a>  <span class="fu">mutate</span>(<span class="at">d.cAIC_absolute =</span> cAIC <span class="sc">-</span> <span class="fu">min</span>(cAIC)) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-22"><a href="#cb5-22"></a>  <span class="fu">group_by</span>(family, type) <span class="sc">%&gt;%</span></span>
+<span id="cb5-23"><a href="#cb5-23"></a>  <span class="co"># add delta value per group</span></span>
+<span id="cb5-24"><a href="#cb5-24"></a>  <span class="fu">mutate</span>(<span class="at">d.cAIC_group =</span> cAIC <span class="sc">-</span> <span class="fu">min</span>(cAIC),</span>
+<span id="cb5-25"><a href="#cb5-25"></a>         <span class="at">d.RMSE_group =</span> RMSE <span class="sc">-</span> <span class="fu">min</span>(RMSE)) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-26"><a href="#cb5-26"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb5-27"><a href="#cb5-27"></a></span>
+<span id="cb5-28"><a href="#cb5-28"></a><span class="co"># extract coefficients and p-values</span></span>
+<span id="cb5-29"><a href="#cb5-29"></a>tidy <span class="ot">&lt;-</span> models <span class="sc">%&gt;%</span> <span class="fu">select</span>(tidy) <span class="sc">%&gt;%</span> <span class="fu">unnest</span>(tidy)</span>
+<span id="cb5-30"><a href="#cb5-30"></a></span>
+<span id="cb5-31"><a href="#cb5-31"></a><span class="co"># extract fitted, fixed and residuals</span></span>
+<span id="cb5-32"><a href="#cb5-32"></a>augment <span class="ot">&lt;-</span> models <span class="sc">%&gt;%</span> <span class="fu">select</span>(augment) <span class="sc">%&gt;%</span> <span class="fu">unnest</span>(augment)</span>
+<span id="cb5-33"><a href="#cb5-33"></a></span>
+<span id="cb5-34"><a href="#cb5-34"></a><span class="co"># extract standard deviation of random effects</span></span>
+<span id="cb5-35"><a href="#cb5-35"></a>std_random <span class="ot">&lt;-</span> models <span class="sc">%&gt;%</span> <span class="fu">select</span>(model_name, std_random) <span class="sc">%&gt;%</span> <span class="fu">unnest</span>(std_random) <span class="sc">%&gt;%</span> <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> PARAMETER, <span class="at">values_from =</span> VALUE)</span>
+<span id="cb5-36"><a href="#cb5-36"></a></span>
+<span id="cb5-37"><a href="#cb5-37"></a>res_random <span class="ot">&lt;-</span> models <span class="sc">%&gt;%</span> <span class="fu">select</span>(model_name, res_random) <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">res_random =</span> <span class="fu">as.numeric</span>(res_random))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="./5_results_FS_leaf_unfolding.html" class="pagination-link  aria-label=" &lt;span="" sylvatica&lt;="" span&gt;"="">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Fagus sylvatica</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./5_results_PA_leaf_unfolding.html" class="pagination-link" aria-label="<span class='chapter-number'>4</span>&nbsp; <span class='chapter-title'>Picea abies</span>">
+        <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Picea abies</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
