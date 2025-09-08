@@ -1,4 +1,4 @@
-# co-rivers-leaf-unfolding
+# co-drivers-leaf-unfolding
 # Readme
 
 This readme gives an overview over the scripts and steps for generating the outputs and analyses associated with the manuscript.
